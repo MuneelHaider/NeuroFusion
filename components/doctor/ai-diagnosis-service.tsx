@@ -1,603 +1,1035 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { Brain, Search, Plus, AlertTriangle, CheckCircle, Clock, User, FileText, Lightbulb } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-
-interface Symptom {
-  id: string
-  name: string
-  severity: "mild" | "moderate" | "severe"
-  duration: string
-  description?: string
-}
-
-interface DiagnosticResult {
-  condition: string
-  confidence: number
-  category: string
-  description: string
-  symptoms: string[]
-  recommendations: string[]
-  urgency: "low" | "medium" | "high"
-  additionalTests?: string[]
-}
-
-interface DiagnosisCase {
-  id: string
-  patientName: string
-  patientAge: number
-  patientGender: string
-  symptoms: Symptom[]
-  results: DiagnosticResult[]
-  timestamp: string
-  status: "analyzing" | "completed" | "reviewed"
-}
-
-const mockDiagnosticResults: DiagnosticResult[] = [
-  {
-    condition: "Hypertension (Essential)",
-    confidence: 87,
-    category: "Cardiovascular",
-    description: "Primary hypertension with no identifiable underlying cause",
-    symptoms: ["elevated blood pressure", "headaches", "dizziness"],
-    recommendations: [
-      "Lifestyle modifications (diet, exercise)",
-      "Monitor blood pressure regularly",
-      "Consider ACE inhibitor therapy",
-      "Follow-up in 2-4 weeks",
-    ],
-    urgency: "medium",
-    additionalTests: ["24-hour blood pressure monitoring", "Basic metabolic panel", "Lipid profile"],
-  },
-  {
-    condition: "Migraine without Aura",
-    confidence: 73,
-    category: "Neurological",
-    description: "Recurrent headache disorder characterized by moderate to severe headaches",
-    symptoms: ["severe headache", "nausea", "light sensitivity"],
-    recommendations: [
-      "Identify and avoid triggers",
-      "Consider prophylactic medication",
-      "Acute treatment with triptans",
-      "Maintain headache diary",
-    ],
-    urgency: "low",
-    additionalTests: ["MRI brain (if red flags present)", "Complete blood count"],
-  },
-  {
-    condition: "Anxiety Disorder",
-    confidence: 65,
-    category: "Mental Health",
-    description: "Generalized anxiety disorder with somatic symptoms",
-    symptoms: ["palpitations", "sweating", "restlessness"],
-    recommendations: [
-      "Cognitive behavioral therapy",
-      "Consider SSRI if severe",
-      "Stress management techniques",
-      "Regular follow-up",
-    ],
-    urgency: "low",
-  },
-]
-
-const mockRecentCases: DiagnosisCase[] = [
-  {
-    id: "C001",
-    patientName: "Sarah Johnson",
-    patientAge: 45,
-    patientGender: "Female",
-    symptoms: [
-      { id: "S1", name: "Chest pain", severity: "moderate", duration: "2 days" },
-      { id: "S2", name: "Shortness of breath", severity: "mild", duration: "1 day" },
-    ],
-    results: mockDiagnosticResults.slice(0, 2),
-    timestamp: "2024-12-15T10:30:00Z",
-    status: "completed",
-  },
-  {
-    id: "C002",
-    patientName: "Michael Chen",
-    patientAge: 32,
-    patientGender: "Male",
-    symptoms: [
-      { id: "S3", name: "Severe headache", severity: "severe", duration: "4 hours" },
-      { id: "S4", name: "Nausea", severity: "moderate", duration: "3 hours" },
-    ],
-    results: [mockDiagnosticResults[1]],
-    timestamp: "2024-12-14T14:15:00Z",
-    status: "reviewed",
-  },
-]
+import { Separator } from "@/components/ui/separator"
+import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import {
+  Brain,
+  Upload,
+  FileImage,
+  CheckCircle,
+  User,
+  FileArchive,
+  X,
+  Download,
+  FileText,
+  Eye,
+} from "lucide-react"
 
 export function AIDiagnosisService() {
   const [user, setUser] = useState<any>(null)
-  const [currentSymptoms, setCurrentSymptoms] = useState<Symptom[]>([])
-  const [newSymptom, setNewSymptom] = useState("")
-  const [symptomSeverity, setSymptomSeverity] = useState<"mild" | "moderate" | "severe">("mild")
-  const [symptomDuration, setSymptomDuration] = useState("")
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisComplete, setAnalysisComplete] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [patientInfo, setPatientInfo] = useState({
-    name: "",
+    fullName: "",
     age: "",
     gender: "",
+    dateOfBirth: "",
+    contactNumber: "",
+    emailAddress: "",
+    address: "",
+    bloodType: "",
+    weight: "",
     medicalHistory: "",
+    currentMedications: ""
   })
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([])
-  const [recentCases, setRecentCases] = useState<DiagnosisCase[]>(mockRecentCases)
 
+  // Get logged-in user information
   useEffect(() => {
     const userData = localStorage.getItem("user")
     if (userData) {
-      setUser(JSON.parse(userData))
+      const parsedUser = JSON.parse(userData)
+      setUser(parsedUser)
+      console.log("User data loaded:", parsedUser)
+    } else {
+      console.log("No user data found in localStorage")
     }
   }, [])
 
-  const addSymptom = () => {
-    if (!newSymptom.trim()) return
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files ? Array.from(event.target.files) : []
+    setUploadedFiles(prev => [...prev, ...files])
+  }
 
-    const symptom: Symptom = {
-      id: Date.now().toString(),
-      name: newSymptom,
-      severity: symptomSeverity,
-      duration: symptomDuration,
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setPatientInfo(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleAnalysis = () => {
+    if (uploadedFiles.length === 0) {
+      alert("Please upload medical images first")
+      return
     }
-
-    setCurrentSymptoms([...currentSymptoms, symptom])
-    setNewSymptom("")
-    setSymptomDuration("")
-  }
-
-  const removeSymptom = (id: string) => {
-    setCurrentSymptoms(currentSymptoms.filter((s) => s.id !== id))
-  }
-
-  const runDiagnosis = async () => {
-    if (currentSymptoms.length === 0) return
-
+    
     setIsAnalyzing(true)
+    setProgress(0)
+    
+    // Simulate 20 second analysis with progress updates
+    const totalSteps = 20
+    const stepDuration = 1000 // 1 second per step
+    
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = prev + (100 / totalSteps)
+        if (newProgress >= 100) {
+          clearInterval(interval)
+          setTimeout(() => {
+            setIsAnalyzing(false)
+            setAnalysisComplete(true)
+          }, 500)
+          return 100
+        }
+        return newProgress
+      })
+    }, stepDuration)
+  }
 
-    try {
-      // Simulate AI analysis
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-      setDiagnosticResults(mockDiagnosticResults)
-    } catch (error) {
-      console.error("Diagnosis failed:", error)
-    } finally {
-      setIsAnalyzing(false)
+  const mockResults = {
+    diagnosis: "Glioblastoma Multiforme (GBM)",
+    tumorLocation: "Right frontal lobe",
+    tumorSize: "3.2 x 2.8 x 2.1 cm",
+    confidence: 94.2,
+    severity: "High Grade (WHO Grade IV)",
+    recommendations: [
+      "Immediate surgical consultation required",
+      "Biopsy for histopathological confirmation",
+      "Consider radiation therapy and chemotherapy",
+      "Regular MRI monitoring every 2-3 months",
+      "Genetic testing for targeted therapy options"
+    ],
+    riskFactors: [
+      "Age-related genetic mutations",
+      "Previous radiation exposure",
+      "Family history of brain tumors",
+      "Immune system disorders"
+    ]
+  }
+
+  const generateReport = () => {
+    // Create a comprehensive report with patient info and diagnosis results
+          console.log("Current user data:", user)
+      console.log("User name:", user?.name)
+      console.log("User specialty:", user?.specialty)
+      console.log("User role:", user?.role)
+      console.log("User licenseNumber:", user?.licenseNumber)
+      
+      const reportData = {
+        patientInfo,
+        diagnosisResults: mockResults,
+        reportDate: new Date().toLocaleDateString(),
+        reportTime: new Date().toLocaleTimeString(),
+        doctorName: `Dr. ${user?.name}` || "Dr. [Doctor Name]",
+        doctorCredentials: user?.specialty || "MBBS, M.MED (RADIOLOGY)",
+        doctorTitle: "Consultant Radiologist",
+        doctorId: user?.licenseNumber || "MMC Registration: [To be filled]",
+        companyName: "NeuroFusion",
+        companyType: "Telemedicine Company",
+        location: "Islamabad, Pakistan",
+        reportNumber: `NF-${Date.now().toString().slice(-6)}`,
+        mrn: patientInfo.fullName ? patientInfo.fullName.replace(/\s+/g, '').toUpperCase() + Date.now().toString().slice(-4) : `MRN${Date.now().toString().slice(-6)}`
+      }
+      
+      console.log("Generated report data:", reportData)
+    
+    // Open report in new tab with built-in PDF viewer
+    const reportWindow = window.open('', '_blank')
+    if (reportWindow) {
+      reportWindow.document.write(generateProfessionalReportHTML(reportData))
+      reportWindow.document.close()
     }
   }
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "mild":
-        return "bg-success/10 text-success"
-      case "moderate":
-        return "bg-warning/10 text-warning"
-      case "severe":
-        return "bg-destructive/10 text-destructive"
-      default:
-        return "bg-muted text-muted-foreground"
-    }
-  }
+  const generateProfessionalReportHTML = (data: any) => {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NeuroFusion AI Brain Tumor Diagnosis Report - ${data.reportNumber}</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+            font-size: 12pt;
+          }
+          
+          .report-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+          }
+          
+          .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          
+          .hospital-name {
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+          }
+          
+          .hospital-legal {
+            font-size: 10pt;
+            margin-bottom: 5px;
+          }
+          
+          .hospital-address {
+            font-size: 10pt;
+            margin-bottom: 5px;
+          }
+          
+          .hospital-contact {
+            font-size: 10pt;
+            margin-bottom: 15px;
+          }
+          
+          .report-title {
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+          }
+          
+          .report-meta {
+            font-size: 10pt;
+            margin-bottom: 15px;
+          }
+          
+          .ai-notice {
+            background: #f8f8f8;
+            border: 1px solid #ccc;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 10pt;
+            text-align: center;
+            border-left: 4px solid #000;
+          }
+          
+          .section {
+            margin-bottom: 25px;
+          }
+          
+          .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+          }
+          
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+          }
+          
+          .info-item {
+            display: flex;
+            align-items: baseline;
+          }
+          
+          .info-label {
+            font-weight: bold;
+            min-width: 120px;
+            margin-right: 10px;
+          }
+          
+          .info-value {
+            flex: 1;
+          }
+          
+          .full-width {
+            grid-column: 1 / -1;
+          }
+          
+          .diagnosis-section {
+            background: #f8f8f8;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 15px 0;
+          }
+          
+          .diagnosis-title {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+          }
+          
+          .diagnosis-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+          }
+          
+          .findings {
+            margin: 15px 0;
+          }
+          
+          .findings-title {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+          }
+          
+          .findings-list {
+            list-style: none;
+            padding-left: 20px;
+          }
+          
+          .findings-list li {
+            margin-bottom: 8px;
+            position: relative;
+          }
+          
+          .findings-list li:before {
+            content: "•";
+            position: absolute;
+            left: -15px;
+            font-weight: bold;
+          }
+          
+          .impression {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #000;
+          }
+          
+          .impression-title {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+          }
+          
+          .recommendations {
+            margin: 20px 0;
+          }
+          
+          .recommendations-title {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+          }
+          
+          .recommendations-list {
+            list-style: none;
+            padding-left: 20px;
+          }
+          
+          .recommendations-list li {
+            margin-bottom: 8px;
+            position: relative;
+          }
+          
+          .recommendations-list li:before {
+            content: "•";
+            position: absolute;
+            left: -15px;
+            font-weight: bold;
+          }
+          
+          .signature-section {
+            margin-top: 40px;
+            text-align: right;
+          }
+          
+          .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin: 30px 0 10px auto;
+          }
+          
+          .signature-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+          
+          .signature-credentials {
+            font-size: 10pt;
+            margin-bottom: 5px;
+          }
+          
+          .signature-title {
+            font-size: 10pt;
+            margin-bottom: 5px;
+          }
+          
+          .signature-id {
+            font-size: 9pt;
+          }
+          
+          .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            padding: 20px;
+            border-top: 1px solid #ccc;
+          }
+          
+          .btn {
+            padding: 10px 20px;
+            border: 1px solid #000;
+            background: #fff;
+            color: #000;
+            font-family: 'Times New Roman', serif;
+            font-size: 11pt;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: background 0.2s;
+          }
+          
+          .btn:hover {
+            background: #f0f0f0;
+          }
+          
+          .btn-primary {
+            background: #000;
+            color: #fff;
+          }
+          
+          .btn-primary:hover {
+            background: #333;
+          }
+          
+          .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+          }
+          
+          @media print {
+            .action-buttons { display: none; }
+            body { background: white; }
+            .report-container { padding: 20px; }
+          }
+          
+          @media screen and (max-width: 768px) {
+            .report-container { padding: 20px; }
+            .info-grid { grid-template-columns: 1fr; }
+            .diagnosis-details { grid-template-columns: 1fr; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-container">
+          <div class="header">
+            <div class="hospital-name">${data.companyName}</div>
+            <div class="hospital-legal">${data.companyType.toUpperCase()}</div>
+            <div class="hospital-address">${data.location}</div>
+            <div class="hospital-contact">AI-Powered Telemedicine Services</div>
+          </div>
+          
+          <div class="report-title">AI BRAIN TUMOR DIAGNOSIS REPORT</div>
+          
+          <div class="report-meta">
+            <strong>Report Number:</strong> ${data.reportNumber} | 
+            <strong>MRN:</strong> ${data.mrn} | 
+            <strong>Report Date:</strong> ${data.reportDate} | 
+            <strong>Time:</strong> ${data.reportTime}
+          </div>
+          
+          <div class="ai-notice">
+            <strong>AI-GENERATED REPORT:</strong> This report is automatically generated by NeuroFusion's artificial intelligence diagnostic system. 
+            It should be reviewed by qualified medical professionals before making clinical decisions.
+          </div>
 
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case "low":
-        return "bg-success/10 text-success"
-      case "medium":
-        return "bg-warning/10 text-warning"
-      case "high":
-        return "bg-destructive/10 text-destructive"
-      default:
-        return "bg-muted text-muted-foreground"
-    }
-  }
+          <div class="section">
+            <div class="section-title">PATIENT INFORMATION</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Name:</span>
+                <span class="info-value">${data.patientInfo.fullName || 'Not provided'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Age:</span>
+                <span class="info-value">${data.patientInfo.age || 'Not provided'} years</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Sex:</span>
+                <span class="info-value">${data.patientInfo.gender ? data.patientInfo.gender.charAt(0).toUpperCase() : 'Not provided'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Date of Birth:</span>
+                <span class="info-value">${data.patientInfo.dateOfBirth || 'Not provided'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Contact:</span>
+                <span class="info-value">${data.patientInfo.contactNumber || 'Not provided'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span class="info-value">${data.patientInfo.emailAddress || 'Not provided'}</span>
+              </div>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Address:</span>
+              <span class="info-value">${data.patientInfo.address || 'Not provided'}</span>
+            </div>
+          </div>
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 80) return "text-success"
-    if (confidence >= 60) return "text-warning"
-    return "text-destructive"
-  }
+          <div class="section">
+            <div class="section-title">MEDICAL INFORMATION</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Blood Type:</span>
+                <span class="info-value">${data.patientInfo.bloodType || 'Not provided'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Weight:</span>
+                <span class="info-value">${data.patientInfo.weight || 'Not provided'} kg</span>
+              </div>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Medical History:</span>
+              <span class="info-value">${data.patientInfo.medicalHistory || 'No significant medical history provided'}</span>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Current Medications:</span>
+              <span class="info-value">${data.patientInfo.currentMedications || 'No current medications listed'}</span>
+            </div>
+          </div>
 
-  if (!user) return null
+          <div class="section">
+            <div class="section-title">AI DIAGNOSIS RESULTS</div>
+            <div class="diagnosis-section">
+              <div class="diagnosis-title">PRIMARY DIAGNOSIS</div>
+              <div class="diagnosis-details">
+                <div class="info-item">
+                  <span class="info-label">Diagnosis:</span>
+                  <span class="info-value">${data.diagnosisResults.diagnosis}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Confidence:</span>
+                  <span class="info-value">${data.diagnosisResults.confidence}%</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Tumor Location:</span>
+                  <span class="info-value">${data.diagnosisResults.tumorLocation}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Tumor Size:</span>
+                  <span class="info-value">${data.diagnosisResults.tumorSize}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Severity Grade:</span>
+                  <span class="info-value">${data.diagnosisResults.severity}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">FINDINGS</div>
+            <div class="findings">
+              <div class="findings-title">AI ANALYSIS FINDINGS</div>
+              <ul class="findings-list">
+                <li>A large mass is detected in the ${data.diagnosisResults.tumorLocation.toLowerCase()}</li>
+                <li>The mass shows characteristics consistent with ${data.diagnosisResults.diagnosis}</li>
+                <li>Tumor dimensions: ${data.diagnosisResults.tumorSize}</li>
+                <li>AI detection confidence: ${data.diagnosisResults.confidence}%</li>
+                <li>Severity classification: ${data.diagnosisResults.severity}</li>
+                <li>No evidence of hydrocephalus in this examination</li>
+                <li>The rest of the brain parenchyma appears normal</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="impression">
+            <div class="impression-title">IMPRESSION</div>
+            <p><strong>${data.diagnosisResults.diagnosis}</strong> detected in the ${data.diagnosisResults.tumorLocation.toLowerCase()} with ${data.diagnosisResults.confidence}% confidence.</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">CLINICAL RECOMMENDATIONS</div>
+            <div class="recommendations">
+              <div class="recommendations-title">IMMEDIATE ACTIONS REQUIRED</div>
+              <ul class="recommendations-list">
+                ${data.diagnosisResults.recommendations.map((rec: string) => `
+                  <li>${rec}</li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+
+
+
+          <div class="signature-section">
+            <div class="signature-line"></div>
+            <div class="signature-name">${data.doctorName}</div>
+            <div class="signature-credentials">${data.doctorCredentials}</div>
+            <div class="signature-title">${data.doctorTitle}</div>
+            <div class="signature-id">${data.doctorId}</div>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+            <button class="btn" onclick="downloadAsPDF()">Download PDF</button>
+            <button class="btn" onclick="downloadAsWord()">Download Word</button>
+          </div>
+
+          <div class="footer">
+            <p><strong>Important Notice:</strong> This report is generated by NeuroFusion's AI diagnostic systems and should be reviewed by qualified medical professionals.</p>
+            <p>© ${new Date().getFullYear()} NeuroFusion Telemedicine Company, Islamabad, Pakistan. All rights reserved.</p>
+          </div>
+        </div>
+
+        <script>
+          async function downloadAsPDF() {
+            try {
+              // Create a new window for PDF generation
+              const pdfWindow = window.open('', '_blank')
+              if (!pdfWindow) {
+                alert('Please allow popups to download PDF')
+                return
+              }
+              
+              // Copy the report content to the new window
+              pdfWindow.document.write(\`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <title>NeuroFusion AI Brain Tumor Diagnosis Report - PDF</title>
+                  <style>
+                    @media print {
+                      body { margin: 0; }
+                      .report-container { padding: 20px; }
+                    }
+                    \${document.querySelector('style').innerHTML}
+                  </style>
+                </head>
+                <body>
+                  \${document.querySelector('.report-container').outerHTML}
+                </body>
+                </html>
+              \`)
+              
+              pdfWindow.document.close()
+              
+              // Wait for content to load then print
+              setTimeout(() => {
+                pdfWindow.print()
+                // Close the window after printing
+                setTimeout(() => pdfWindow.close(), 1000)
+              }, 500)
+              
+            } catch (error) {
+              console.error('PDF generation failed:', error)
+              alert('PDF generation failed. Please try printing instead.')
+            }
+          }
+          
+          async function downloadAsWord() {
+            try {
+              // Create a simple Word document structure
+              const content = document.querySelector('.report-container').innerText
+              
+              // Create a blob with the content
+              const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
+              const url = window.URL.createObjectURL(blob)
+              
+              // Create download link
+              const link = document.createElement('a')
+              link.href = url
+              link.download = 'neurofusion-ai-diagnosis-report-${data.reportNumber}.docx'
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
+              
+              // Cleanup
+              window.URL.revokeObjectURL(url)
+              
+            } catch (error) {
+              console.error('Word generation failed:', error)
+              alert('Word generation failed. Please try printing instead.')
+            }
+          }
+        </script>
+      </body>
+      </html>
+    `
+  }
 
   return (
     <DashboardLayout 
       headerContent={{
-        title: "AI Diagnosis Assistant",
-        description: "AI-powered diagnostic support for clinical decision making"
+        title: "AI Brain Tumor Diagnosis",
+        description: "Advanced artificial intelligence-powered brain tumor detection and analysis"
       }}
     >
       <div className="space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Patient Information */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Patient Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Cases Today</p>
-                  <p className="text-2xl font-bold">12</p>
+                  <label className="text-sm font-medium">Full Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter patient name"
+                    value={patientInfo.fullName}
+                    onChange={(e) => handleInputChange("fullName", e.target.value)}
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    required
+                  />
                 </div>
-                <Brain className="w-8 h-8 text-primary" />
+                <div>
+                  <label className="text-sm font-medium">Age *</label>
+                  <input
+                    type="number"
+                    placeholder="Age"
+                    value={patientInfo.age}
+                    onChange={(e) => handleInputChange("age", e.target.value)}
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Gender *</label>
+                  <select 
+                    value={patientInfo.gender}
+                    onChange={(e) => handleInputChange("gender", e.target.value)}
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    required
+                  >
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Date of Birth *</label>
+                  <input
+                    type="date"
+                    value={patientInfo.dateOfBirth}
+                    onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Contact Number *</label>
+                <input
+                  type="tel"
+                  placeholder="Phone number"
+                  value={patientInfo.contactNumber}
+                  onChange={(e) => handleInputChange("contactNumber", e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border rounded-md"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Email Address</label>
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={patientInfo.emailAddress}
+                  onChange={(e) => handleInputChange("emailAddress", e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Address</label>
+                <textarea
+                  placeholder="Full address"
+                  rows={2}
+                  value={patientInfo.address}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border rounded-md"
+                />
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Blood Type</label>
+                  <select 
+                    value={patientInfo.bloodType}
+                    onChange={(e) => handleInputChange("bloodType", e.target.value)}
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                  >
+                    <option value="">Select blood type</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Weight (kg)</label>
+                  <input
+                    type="number"
+                    placeholder="Weight"
+                    value={patientInfo.weight}
+                    onChange={(e) => handleInputChange("weight", e.target.value)}
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Medical History</label>
+                <textarea
+                  placeholder="Previous conditions, surgeries, medications..."
+                  rows={3}
+                  value={patientInfo.medicalHistory}
+                  onChange={(e) => handleInputChange("medicalHistory", e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Current Medications</label>
+                <textarea
+                  placeholder="List current medications and dosages"
+                  rows={2}
+                  value={patientInfo.currentMedications}
+                  onChange={(e) => handleInputChange("currentMedications", e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border rounded-md"
+                />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Avg Confidence</p>
-                  <p className="text-2xl font-bold">84%</p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-success" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Processing Time</p>
-                  <p className="text-2xl font-bold">2.3s</p>
-                </div>
-                <Clock className="w-8 h-8 text-accent" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Accuracy Rate</p>
-                  <p className="text-2xl font-bold">92%</p>
-                </div>
-                <AlertTriangle className="w-8 h-8 text-warning" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="new-diagnosis" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="new-diagnosis">New Diagnosis</TabsTrigger>
-            <TabsTrigger value="recent-cases">Recent Cases ({recentCases.length})</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="new-diagnosis" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Input Section */}
-              <div className="space-y-6">
-                {/* Patient Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="w-5 h-5" />
-                      Patient Information
-                    </CardTitle>
-                    <CardDescription>Enter basic patient details for context</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="patientName">Patient Name</Label>
-                        <Input
-                          id="patientName"
-                          value={patientInfo.name}
-                          onChange={(e) => setPatientInfo({ ...patientInfo, name: e.target.value })}
-                          placeholder="Enter patient name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="patientAge">Age</Label>
-                        <Input
-                          id="patientAge"
-                          type="number"
-                          value={patientInfo.age}
-                          onChange={(e) => setPatientInfo({ ...patientInfo, age: e.target.value })}
-                          placeholder="Age"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patientGender">Gender</Label>
-                      <Select
-                        value={patientInfo.gender}
-                        onValueChange={(value) => setPatientInfo({ ...patientInfo, gender: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="medicalHistory">Relevant Medical History</Label>
-                      <Textarea
-                        id="medicalHistory"
-                        value={patientInfo.medicalHistory}
-                        onChange={(e) => setPatientInfo({ ...patientInfo, medicalHistory: e.target.value })}
-                        placeholder="Enter relevant medical history, medications, allergies..."
-                        rows={3}
+          {/* Right Column - AI Diagnosis */}
+          <div className="space-y-6">
+            {/* Upload Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="w-5 h-5" />
+                  Upload Medical Images
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                  <Brain className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Upload Brain Scan Images</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Upload MRI, CT scans, or DICOM files for AI-powered brain tumor analysis
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <FileImage className="w-4 h-4" />
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,.dcm"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="image-upload"
                       />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Symptoms Input */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Search className="w-5 h-5" />
-                      Symptoms & Observations
-                    </CardTitle>
-                    <CardDescription>Add patient symptoms and clinical observations</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <Input
-                          value={newSymptom}
-                          onChange={(e) => setNewSymptom(e.target.value)}
-                          placeholder="Enter symptom (e.g., chest pain, fever, headache)"
-                          onKeyPress={(e) => e.key === "Enter" && addSymptom()}
-                        />
-                      </div>
-                      <Select value={symptomSeverity} onValueChange={(value: any) => setSymptomSeverity(value)}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mild">Mild</SelectItem>
-                          <SelectItem value="moderate">Moderate</SelectItem>
-                          <SelectItem value="severe">Severe</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Input
-                        value={symptomDuration}
-                        onChange={(e) => setSymptomDuration(e.target.value)}
-                        placeholder="Duration (e.g., 2 days, 3 hours)"
-                        className="flex-1"
-                      />
-                      <Button onClick={addSymptom} disabled={!newSymptom.trim()}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add
-                      </Button>
-                    </div>
-
-                    {/* Current Symptoms */}
-                    {currentSymptoms.length > 0 && (
-                      <div className="space-y-2">
-                        <Label>Current Symptoms:</Label>
-                        <div className="space-y-2">
-                          {currentSymptoms.map((symptom) => (
-                            <div
-                              key={symptom.id}
-                              className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                            >
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{symptom.name}</span>
-                                  <Badge className={getSeverityColor(symptom.severity)}>{symptom.severity}</Badge>
-                                </div>
-                                {symptom.duration && (
-                                  <p className="text-sm text-muted-foreground">Duration: {symptom.duration}</p>
-                                )}
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeSymptom(symptom.id)}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <Button
-                      onClick={runDiagnosis}
-                      disabled={currentSymptoms.length === 0 || isAnalyzing}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isAnalyzing ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                          Analyzing Symptoms...
-                        </>
-                      ) : (
-                        <>
-                          <Brain className="w-4 h-4 mr-2" />
-                          Run AI Diagnosis
-                        </>
-                      )}
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        Image Files
+                      </label>
                     </Button>
-                  </CardContent>
-                </Card>
-              </div>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <FileArchive className="w-4 h-4" />
+                      <input
+                        type="file"
+                        multiple
+                        accept=".dcm,.zip"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="dicom-upload"
+                      />
+                      <label htmlFor="dicom-upload" className="cursor-pointer">
+                        DICOM Files
+                      </label>
+                    </Button>
+                  </div>
+                </div>
 
-              {/* Results Section */}
-              <div className="space-y-6">
-                {isAnalyzing && (
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="text-center space-y-4">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                          <Brain className="w-8 h-8 text-primary animate-pulse" />
+                {/* Uploaded Files List */}
+                {uploadedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Uploaded Files:</h4>
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <FileImage className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{file.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                          </span>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">AI Analysis in Progress</h3>
-                          <p className="text-muted-foreground">Processing symptoms and medical data...</p>
-                        </div>
-                        <Progress value={75} className="w-full" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {diagnosticResults.length > 0 && !isAnalyzing && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Lightbulb className="w-5 h-5" />
-                        Diagnostic Suggestions
-                      </CardTitle>
-                      <CardDescription>AI-generated diagnostic possibilities ranked by confidence</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {diagnosticResults.map((result, index) => (
-                        <div key={index} className="border rounded-lg p-4 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold">
-                                {index + 1}
-                              </div>
-                              <div>
-                                <h4 className="font-semibold">{result.condition}</h4>
-                                <p className="text-sm text-muted-foreground">{result.category}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className={`text-lg font-bold ${getConfidenceColor(result.confidence)}`}>
-                                {result.confidence}%
-                              </div>
-                              <Badge className={getUrgencyColor(result.urgency)}>{result.urgency} priority</Badge>
-                            </div>
-                          </div>
-
-                          <p className="text-sm">{result.description}</p>
-
-                          <div className="space-y-2">
-                            <div>
-                              <h5 className="text-sm font-medium">Matching Symptoms:</h5>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {result.symptoms.map((symptom, i) => (
-                                  <Badge key={i} variant="outline" className="text-xs">
-                                    {symptom}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div>
-                              <h5 className="text-sm font-medium">Recommendations:</h5>
-                              <ul className="text-sm text-muted-foreground mt-1 space-y-1">
-                                {result.recommendations.map((rec, i) => (
-                                  <li key={i} className="flex items-start gap-2">
-                                    <span className="text-primary">•</span>
-                                    {rec}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-
-                            {result.additionalTests && (
-                              <div>
-                                <h5 className="text-sm font-medium">Suggested Tests:</h5>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {result.additionalTests.map((test, i) => (
-                                    <Badge key={i} variant="secondary" className="text-xs">
-                                      {test}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-
-                      <Alert>
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                          <strong>Important:</strong> These are AI-generated suggestions for clinical decision support.
-                          Always use your professional judgment and consider additional clinical factors before making
-                          diagnostic decisions.
-                        </AlertDescription>
-                      </Alert>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="recent-cases" className="space-y-4">
-            {recentCases.map((case_) => (
-              <Card key={case_.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-3 flex-1">
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <h3 className="font-semibold text-lg">{case_.patientName}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {case_.patientAge} years old, {case_.patientGender} •
-                            {new Date(case_.timestamp).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Badge
-                          className={
-                            case_.status === "completed" ? "bg-success/10 text-success" : "bg-primary/10 text-primary"
-                          }
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          className="h-6 w-6 p-0"
                         >
-                          {case_.status}
-                        </Badge>
+                          <X className="w-3 h-3" />
+                        </Button>
                       </div>
+                    ))}
+                  </div>
+                )}
 
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Symptoms:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {case_.symptoms.map((symptom) => (
-                            <Badge key={symptom.id} className={getSeverityColor(symptom.severity)}>
-                              {symptom.name} ({symptom.severity})
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+                {!isAnalyzing && !analysisComplete && uploadedFiles.length > 0 && (
+                  <Button 
+                    onClick={handleAnalysis}
+                    className="w-full p-10 text-3xl"
+                    size="lg"
+                    disabled={uploadedFiles.length === 0}
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    Run AI Brain Tumor Diagnosis
+                  </Button>
+                )}
 
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Top Diagnosis:</h4>
-                        <p className="text-sm">
-                          {case_.results[0]?.condition} ({case_.results[0]?.confidence}% confidence)
-                        </p>
-                      </div>
+                {isAnalyzing && (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                      <h3 className="text-lg font-semibold mb-2">Analyzing Brain Scan...</h3>
+                      <p className="text-muted-foreground">AI is examining the uploaded images for tumor detection and analysis</p>
                     </div>
+                    <Progress value={progress} className="w-full" />
+                    <p className="text-center text-sm text-muted-foreground">
+                      {Math.round(progress)}% Complete • Estimated time: {Math.ceil((100 - progress) / 5)} seconds
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-                    <Button variant="outline" size="sm">
+            {/* Results Section */}
+            {analysisComplete && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    AI Diagnosis Results
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="font-semibold text-green-800">Analysis Complete</span>
+                    </div>
+                    <p className="text-green-700 text-sm">
+                      AI has successfully analyzed the brain scan and generated a comprehensive tumor diagnosis report.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <h4 className="font-semibold text-red-800 mb-1">Primary Diagnosis</h4>
+                      <p className="text-red-700 text-sm">{mockResults.diagnosis}</p>
+                    </div>
+                    <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                      <h4 className="font-semibold text-orange-800 mb-1">Detection Confidence</h4>
+                      <p className="text-orange-700 text-sm">{mockResults.confidence}%</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-semibold text-blue-800 mb-1">Tumor Location</h4>
+                      <p className="text-blue-700 text-sm">{mockResults.tumorLocation}</p>
+                    </div>
+                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                      <h4 className="font-semibold text-purple-800 mb-1">Tumor Size</h4>
+                      <p className="text-purple-700 text-sm">{mockResults.tumorSize}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">Key Recommendations</h4>
+                    <ul className="space-y-2">
+                      {mockResults.recommendations.slice(0, 3).map((rec, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-sm">{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1" onClick={generateReport}>
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Report
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      generateReport()
+                      // PDF download will be handled in the new tab
+                    }}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      generateReport()
+                      // Word download will be handled in the new tab
+                    }}>
                       <FileText className="w-4 h-4 mr-2" />
-                      View Details
+                      Download Word
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </TabsContent>
-        </Tabs>
+            )}
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   )

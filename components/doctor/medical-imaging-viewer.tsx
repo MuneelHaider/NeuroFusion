@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { DicomViewer } from "@/components/doctor/dicom-viewer"
 import {
   Upload,
   ZoomIn,
@@ -26,9 +27,11 @@ import {
   Pause,
   SkipBack,
   SkipForward,
+  X,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface MedicalImage {
   id: string
@@ -145,6 +148,9 @@ export function MedicalImagingViewer() {
   const [currentSlice, setCurrentSlice] = useState(1)
   const [showAIAnalysis, setShowAIAnalysis] = useState(true)
   const [report, setReport] = useState("")
+  const [viewMode, setViewMode] = useState<"regular" | "dicom">("regular")
+  const [showDicomViewer, setShowDicomViewer] = useState(false)
+  const [selectedPatient, setSelectedPatient] = useState<{ id: string; name: string } | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -215,7 +221,51 @@ export function MedicalImagingViewer() {
     }
   }
 
+  const openDicomViewer = (image: MedicalImage) => {
+    setSelectedPatient({ id: image.patientId, name: image.patientName })
+    setShowDicomViewer(true)
+  }
+
+  const closeDicomViewer = () => {
+    setShowDicomViewer(false)
+    setSelectedPatient(null)
+  }
+
   if (!user) return null
+
+  // If DICOM viewer is active, show only that
+  if (showDicomViewer && selectedPatient) {
+    return (
+      <DashboardLayout 
+        headerContent={{
+          title: "DICOM Medical Imaging Viewer",
+          description: "Advanced DICOM file viewing and analysis",
+          actions: (
+            <>
+              <Button variant="outline" onClick={closeDicomViewer}>
+                <X className="w-4 h-4 mr-2" />
+                Back to Images
+              </Button>
+              <Button variant="outline">
+                <Upload className="w-4 h-4 mr-2" />
+                Upload DICOM
+              </Button>
+              <Button variant="outline">
+                <Share className="w-4 h-4 mr-2" />
+                Share Study
+              </Button>
+            </>
+          )
+        }}
+      >
+        <DicomViewer 
+          patientId={selectedPatient.id}
+          patientName={selectedPatient.name}
+          onClose={closeDicomViewer}
+        />
+      </DashboardLayout>
+    )
+  }
 
   return (
     <DashboardLayout 
@@ -237,6 +287,41 @@ export function MedicalImagingViewer() {
       }}
     >
       <div className="space-y-6">
+        {/* View Mode Toggle */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium">View Mode:</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={viewMode === "regular" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("regular")}
+                  >
+                    <FileImage className="w-4 h-4 mr-2" />
+                    Regular Images
+                  </Button>
+                  <Button
+                    variant={viewMode === "dicom" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("dicom")}
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    DICOM Viewer
+                  </Button>
+                </div>
+              </div>
+              {viewMode === "dicom" && (
+                <Button onClick={() => openDicomViewer(selectedImage!)}>
+                  <Brain className="w-4 h-4 mr-2" />
+                  Open DICOM Viewer
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Image Library */}
           <Card className="lg:col-span-1">
@@ -264,6 +349,20 @@ export function MedicalImagingViewer() {
                       <p className="font-medium text-sm truncate">{image.patientName}</p>
                       <p className="text-xs text-muted-foreground">{image.bodyPart}</p>
                       <p className="text-xs text-muted-foreground">{image.studyDate}</p>
+                      {viewMode === "dicom" && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="mt-2 w-full"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openDicomViewer(image)
+                          }}
+                        >
+                          <Brain className="w-3 h-3 mr-1" />
+                          Open DICOM
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

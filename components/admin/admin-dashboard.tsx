@@ -118,23 +118,22 @@ export function AdminDashboard() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Platform management and compliance monitoring</p>
-          </div>
-          <div className="flex items-center gap-2">
+    <DashboardLayout 
+      headerContent={{
+        title: "Admin Dashboard",
+        description: "Platform management and compliance monitoring",
+        actions: (
+          <>
             <Button variant="outline">
               <Settings className="w-4 h-4 mr-2" />
               System Settings
             </Button>
             <Button>Generate Report</Button>
-          </div>
-        </div>
-
+          </>
+        )
+      }}
+    >
+      <div className="space-y-6">
         {/* Critical Alerts */}
         {alerts.filter((alert) => alert.severity === "critical").length > 0 && (
           <Alert className="border-destructive">

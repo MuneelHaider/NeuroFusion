@@ -212,22 +212,21 @@ export function PatientAppointments() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">My Appointments</h1>
-            <p className="text-muted-foreground">Manage your healthcare appointments</p>
-          </div>
+    <DashboardLayout 
+      headerContent={{
+        title: "My Appointments",
+        description: "Manage your healthcare appointments",
+        actions: (
           <Link href="/patient/doctors">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Book New Appointment
             </Button>
           </Link>
-        </div>
-
+        )
+      }}
+    >
+      <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>

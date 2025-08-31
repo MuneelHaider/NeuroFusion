@@ -35,19 +35,34 @@ import {
 
 interface DashboardLayoutProps {
   children: React.ReactNode
+  headerContent?: {
+    title: string
+    description?: string
+    actions?: React.ReactNode
+  }
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, headerContent }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
   const router = useRouter()
 
   useEffect(() => {
+    // Read user data from localStorage
     const userData = localStorage.getItem("user")
     if (userData) {
-      setUser(JSON.parse(userData))
+      try {
+        setUser(JSON.parse(userData))
+      } catch (error) {
+        console.error("Failed to parse user data:", error)
+        localStorage.removeItem("user")
+        router.push("/auth/login")
+      }
+    } else {
+      // No user data, redirect to login
+      router.push("/auth/login")
     }
-  }, [])
+  }, [router])
 
   const handleLogout = () => {
     localStorage.removeItem("user")
@@ -83,7 +98,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   if (!user) return null
 
-  const navItems = user.role === "doctor" ? doctorNavItems : user.role === "admin" ? adminNavItems : patientNavItems
+  // Helper function to normalize role for comparison
+  const normalizeRole = (role: string): string => {
+    return role.toLowerCase()
+  }
+
+  const navItems = normalizeRole(user.role) === "doctor" 
+    ? doctorNavItems 
+    : normalizeRole(user.role) === "admin" 
+      ? adminNavItems 
+      : patientNavItems
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,27 +118,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-card border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
-              <Brain className="w-5 h-5 text-primary-foreground" />
+          <div className="flex items-center gap-4 ml-7">
+            <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-lg">
+              <Brain className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">NeuroFusion</span>
+            <span className="font-bold text-xl">NeuroFusion</span>
           </div>
           <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-6 space-y-3">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                <item.icon className="mr-3 h-4 w-4" />
+              <Button variant="ghost" className="w-full justify-start h-12 text-base" onClick={() => setSidebarOpen(false)}>
+                <item.icon className="mr-4 h-5 w-5" />
                 {item.label}
               </Button>
             </Link>
@@ -123,46 +147,65 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-72">
         {/* Top bar */}
-        <header className="bg-card border-b px-4 py-3">
+        <header className="bg-card border-b px-6 py-4">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-              <Menu className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-6">
+              <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+                <Menu className="h-5 w-5" />
+              </Button>
 
-            <div className="flex items-center gap-4 ml-auto">
+              {/* Header Content */}
+              {headerContent && (
+                <div className="flex items-center gap-6">
+                  <div>
+                    <h1 className="text-2xl font-bold text-foreground">{headerContent.title}</h1>
+                    {headerContent.description && (
+                      <p className="text-base text-muted-foreground mt-1">{headerContent.description}</p>
+                    )}
+                  </div>
+                  {headerContent.actions && (
+                    <div className="flex items-center gap-3">
+                      {headerContent.actions}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-6 ml-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                  <Button variant="ghost" className="relative h-12 w-12 rounded-full">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                         {user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-64" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user.name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    <div className="flex flex-col space-y-2">
+                      <p className="text-base font-medium leading-none">{user.name}</p>
+                      <p className="text-sm leading-none text-muted-foreground">{user.email}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
-                      <Users className="mr-2 h-4 w-4" />
+                      <Users className="mr-3 h-5 w-5" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Settings className="mr-3 h-5 w-5" />
                     Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="mr-3 h-5 w-5" />
                     Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -172,7 +215,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="p-6">{children}</main>
+        <main className="p-8">{children}</main>
       </div>
     </div>
   )

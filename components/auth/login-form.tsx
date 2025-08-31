@@ -1,21 +1,31 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Mail, Lock } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2, Mail, Lock, Stethoscope, Users, Shield } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
 
 export function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [formData, setFormData] = useState({
+    role: "patient",
+    email: "",
+    password: "",
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { login } = useAuth()
+
+  // Helper function to normalize role for comparison
+  const normalizeRole = (role: string): string => {
+    return role.toLowerCase()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,33 +33,26 @@ export function LoginForm() {
     setError("")
 
     try {
-      // Mock authentication - replace with real auth later
-      if (email && password) {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Mock user data
-        const userData = {
-          id: "1",
-          email,
-          name: email.split("@")[0],
-          role: email.includes("doctor") ? "doctor" : "patient",
-        }
-
-        // Store user data (replace with proper auth)
-        localStorage.setItem("user", JSON.stringify(userData))
-
-        // Redirect based on role
-        if (userData.role === "doctor") {
+      const result = await login(formData)
+      
+      if (result.success) {
+        // ✅ Simple redirect based on form input role
+        const normalizedRole = normalizeRole(formData.role)
+        
+        if (normalizedRole === "doctor") {
           router.push("/doctor/dashboard")
-        } else {
+        } else if (normalizedRole === "admin") {
+          router.push("/admin/dashboard")
+        } else if (normalizedRole === "patient") {
           router.push("/patient/dashboard")
+        } else {
+          router.push("/")
         }
       } else {
-        setError("Please enter both email and password")
+        setError(result.message)
       }
     } catch (err) {
-      setError("Invalid credentials. Please try again.")
+      setError("Login failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -64,6 +67,35 @@ export function LoginForm() {
       )}
 
       <div className="space-y-2">
+        <Label htmlFor="role">Account Type</Label>
+        <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="doctor">
+              <div className="flex items-center gap-2">
+                <Stethoscope className="h-4 w-4" />
+                Healthcare Provider
+              </div>
+            </SelectItem>
+            <SelectItem value="patient">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Patient
+              </div>
+            </SelectItem>
+            <SelectItem value="admin">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Administrator
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -71,8 +103,8 @@ export function LoginForm() {
             id="email"
             type="email"
             placeholder="doctor@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="pl-10"
             required
           />
@@ -87,8 +119,8 @@ export function LoginForm() {
             id="password"
             type="password"
             placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             className="pl-10"
             required
           />

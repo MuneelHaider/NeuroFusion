@@ -10,21 +10,26 @@ interface User {
   id: string
   email: string
   name: string
-  role: "doctor" | "patient" | "admin" // Added admin role
+  role: string // Flexible string to handle both cases
   specialty?: string
   licenseNumber?: string
 }
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  allowedRoles?: ("doctor" | "patient" | "admin")[] // Made optional and added admin role
-  requiredRole?: "doctor" | "patient" | "admin" // Added single role requirement option
+  allowedRoles?: string[] // Flexible string array to handle both cases
+  requiredRole?: string // Flexible string to handle both cases
 }
 
 export function ProtectedRoute({ children, allowedRoles, requiredRole }: ProtectedRouteProps) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+  // Helper function to normalize role for comparison
+  const normalizeRole = (role: string): string => {
+    return role.toLowerCase()
+  }
 
   useEffect(() => {
     const checkAuth = () => {
@@ -38,9 +43,11 @@ export function ProtectedRoute({ children, allowedRoles, requiredRole }: Protect
         const parsedUser = JSON.parse(userData) as User
 
         const hasAccess = requiredRole
-          ? parsedUser.role === requiredRole
+          ? normalizeRole(parsedUser.role) === normalizeRole(requiredRole)
           : allowedRoles
-            ? allowedRoles.includes(parsedUser.role)
+            ? allowedRoles.some(allowedRole => 
+                normalizeRole(allowedRole) === normalizeRole(parsedUser.role)
+              )
             : true
 
         if (!hasAccess) {

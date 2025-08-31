@@ -23,50 +23,373 @@ interface Appointment {
 }
 
 const mockAppointments: Appointment[] = [
+  // Today's appointments (January 2025)
   {
     id: "1",
     patientName: "Sarah Johnson",
     patientId: "P001",
-    date: "2024-12-15",
+    date: "2025-01-27",
     time: "09:00",
     duration: 30,
     type: "in-person",
     status: "confirmed",
     reason: "Routine Checkup",
+    notes: "Patient reports mild chest discomfort"
   },
   {
     id: "2",
     patientName: "Michael Chen",
     patientId: "P002",
-    date: "2024-12-15",
+    date: "2025-01-27",
     time: "10:30",
     duration: 45,
     type: "video",
     status: "scheduled",
     reason: "Follow-up Consultation",
+    notes: "Post-surgery recovery check"
   },
   {
     id: "3",
     patientName: "Emily Rodriguez",
     patientId: "P003",
-    date: "2024-12-15",
+    date: "2025-01-27",
     time: "14:00",
     duration: 60,
     type: "in-person",
     status: "confirmed",
     reason: "Specialist Consultation",
+    notes: "Cardiac stress test results review"
   },
   {
     id: "4",
     patientName: "David Wilson",
     patientId: "P004",
-    date: "2024-12-16",
-    time: "11:00",
+    date: "2025-01-27",
+    time: "15:30",
     duration: 30,
     type: "phone",
     status: "scheduled",
     reason: "Prescription Review",
+    notes: "Blood pressure medication adjustment"
   },
+  {
+    id: "5",
+    patientName: "Jennifer Lee",
+    patientId: "P005",
+    date: "2025-01-27",
+    time: "16:00",
+    duration: 45,
+    type: "video",
+    status: "confirmed",
+    reason: "Emergency Consultation",
+    notes: "Severe chest pain symptoms"
+  },
+  {
+    id: "6",
+    patientName: "Robert Brown",
+    patientId: "P006",
+    date: "2025-01-27",
+    time: "17:00",
+    duration: 30,
+    type: "in-person",
+    status: "scheduled",
+    reason: "Routine Checkup",
+    notes: "Annual physical examination"
+  },
+
+  // Tomorrow's appointments
+  {
+    id: "7",
+    patientName: "Lisa Anderson",
+    patientId: "P007",
+    date: "2025-01-28",
+    time: "08:00",
+    duration: 60,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Cardiac Catheterization",
+    notes: "Pre-procedure consultation"
+  },
+  {
+    id: "8",
+    patientName: "James Martinez",
+    patientId: "P008",
+    date: "2025-01-28",
+    time: "09:30",
+    duration: 45,
+    type: "video",
+    status: "scheduled",
+    reason: "Follow-up Consultation",
+    notes: "Post-angioplasty recovery"
+  },
+  {
+    id: "9",
+    patientName: "Amanda Taylor",
+    patientId: "P009",
+    date: "2025-01-28",
+    time: "11:00",
+    duration: 30,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Routine Checkup",
+    notes: "Diabetes management review"
+  },
+  {
+    id: "10",
+    patientName: "Christopher Garcia",
+    patientId: "P010",
+    date: "2025-01-28",
+    time: "13:00",
+    duration: 45,
+    type: "phone",
+    status: "scheduled",
+    reason: "Prescription Review",
+    notes: "Cholesterol medication check"
+  },
+  {
+    id: "11",
+    patientName: "Nicole White",
+    patientId: "P011",
+    date: "2025-01-28",
+    time: "14:30",
+    duration: 60,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Specialist Consultation",
+    notes: "Echocardiogram results discussion"
+  },
+  {
+    id: "12",
+    patientName: "Kevin Johnson",
+    patientId: "P012",
+    date: "2025-01-28",
+    time: "16:00",
+    duration: 30,
+    type: "video",
+    status: "scheduled",
+    reason: "Follow-up Consultation",
+    notes: "Post-heart attack recovery"
+  },
+
+  // This week's appointments
+  {
+    id: "13",
+    patientName: "Rachel Davis",
+    patientId: "P013",
+    date: "2025-01-29",
+    time: "09:00",
+    duration: 45,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Routine Checkup",
+    notes: "Hypertension monitoring"
+  },
+  {
+    id: "14",
+    patientName: "Thomas Miller",
+    patientId: "P014",
+    date: "2025-01-29",
+    time: "10:30",
+    duration: 60,
+    type: "video",
+    status: "scheduled",
+    reason: "Emergency Consultation",
+    notes: "Irregular heartbeat concerns"
+  },
+  {
+    id: "15",
+    patientName: "Jessica Thompson",
+    patientId: "P015",
+    date: "2025-01-29",
+    time: "14:00",
+    duration: 30,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Follow-up Consultation",
+    notes: "Post-cardiac surgery check"
+  },
+  {
+    id: "16",
+    patientName: "Daniel Clark",
+    patientId: "P016",
+    date: "2025-01-30",
+    time: "08:30",
+    duration: 45,
+    type: "phone",
+    status: "scheduled",
+    reason: "Prescription Review",
+    notes: "Blood thinner dosage adjustment"
+  },
+  {
+    id: "17",
+    patientName: "Stephanie Lewis",
+    patientId: "P017",
+    date: "2025-01-30",
+    time: "11:00",
+    duration: 60,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Specialist Consultation",
+    notes: "Cardiac MRI results review"
+  },
+  {
+    id: "18",
+    patientName: "Ryan Hall",
+    patientId: "P018",
+    date: "2025-01-30",
+    time: "15:00",
+    duration: 30,
+    type: "video",
+    status: "scheduled",
+    reason: "Routine Checkup",
+    notes: "Annual cardiac assessment"
+  },
+  {
+    id: "19",
+    patientName: "Megan Allen",
+    patientId: "P019",
+    date: "2025-01-31",
+    time: "09:00",
+    duration: 45,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Follow-up Consultation",
+    notes: "Post-stent placement recovery"
+  },
+  {
+    id: "20",
+    patientName: "Andrew Young",
+    patientId: "P020",
+    date: "2025-01-31",
+    time: "13:30",
+    duration: 60,
+    type: "video",
+    status: "scheduled",
+    reason: "Emergency Consultation",
+    notes: "Chest pain evaluation"
+  },
+  {
+    id: "21",
+    patientName: "Lauren King",
+    patientId: "P021",
+    date: "2025-01-31",
+    time: "16:00",
+    duration: 30,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Routine Checkup",
+    notes: "Cardiac risk assessment"
+  },
+  {
+    id: "22",
+    patientName: "Brandon Scott",
+    patientId: "P022",
+    date: "2025-02-01",
+    time: "08:00",
+    duration: 45,
+    type: "phone",
+    status: "scheduled",
+    reason: "Prescription Review",
+    notes: "Beta blocker medication check"
+  },
+  {
+    id: "23",
+    patientName: "Ashley Green",
+    patientId: "P023",
+    date: "2025-02-01",
+    time: "10:00",
+    duration: 60,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Specialist Consultation",
+    notes: "Stress test preparation"
+  },
+  {
+    id: "24",
+    patientName: "Matthew Baker",
+    patientId: "P024",
+    date: "2025-02-01",
+    time: "14:00",
+    duration: 30,
+    type: "video",
+    status: "scheduled",
+    reason: "Follow-up Consultation",
+    notes: "Post-cardiac rehabilitation"
+  },
+  {
+    id: "25",
+    patientName: "Samantha Adams",
+    patientId: "P025",
+    date: "2025-02-01",
+    time: "16:30",
+    duration: 45,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Routine Checkup",
+    notes: "Heart failure management"
+  },
+  
+  // Additional appointments for next week
+  {
+    id: "26",
+    patientName: "Alex Thompson",
+    patientId: "P026",
+    date: "2025-02-03",
+    time: "09:00",
+    duration: 45,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Cardiac Consultation",
+    notes: "New patient with family history"
+  },
+  {
+    id: "27",
+    patientName: "Maria Garcia",
+    patientId: "P027",
+    date: "2025-02-03",
+    time: "11:00",
+    duration: 60,
+    type: "video",
+    status: "scheduled",
+    reason: "Follow-up Consultation",
+    notes: "Post-cardiac event monitoring"
+  },
+  {
+    id: "28",
+    patientName: "John Smith",
+    patientId: "P028",
+    date: "2025-02-04",
+    time: "14:00",
+    duration: 30,
+    type: "phone",
+    status: "scheduled",
+    reason: "Prescription Review",
+    notes: "Medication side effects discussion"
+  },
+  {
+    id: "29",
+    patientName: "Emma Wilson",
+    patientId: "P029",
+    date: "2025-02-04",
+    time: "16:00",
+    duration: 45,
+    type: "in-person",
+    status: "confirmed",
+    reason: "Emergency Consultation",
+    notes: "Chest tightness evaluation"
+  },
+  {
+    id: "30",
+    patientName: "Carlos Rodriguez",
+    patientId: "P030",
+    date: "2025-02-05",
+    time: "08:30",
+    duration: 60,
+    type: "video",
+    status: "scheduled",
+    reason: "Specialist Consultation",
+    notes: "Cardiac imaging results review"
+  }
 ]
 
 export function AppointmentScheduling() {
@@ -119,20 +442,19 @@ export function AppointmentScheduling() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Appointment Scheduling</h1>
-            <p className="text-muted-foreground">Manage your appointments and schedule</p>
-          </div>
+    <DashboardLayout 
+      headerContent={{
+        title: "Appointment Scheduling",
+        description: "Manage your appointments and schedule",
+        actions: (
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             New Appointment
           </Button>
-        </div>
-
+        )
+      }}
+    >
+      <div className="space-y-6">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
@@ -152,7 +474,7 @@ export function AppointmentScheduling() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">This Week</p>
-                  <p className="text-2xl font-bold">23</p>
+                  <p className="text-2xl font-bold">30</p>
                 </div>
                 <Clock className="w-8 h-8 text-accent" />
               </div>
@@ -169,7 +491,7 @@ export function AppointmentScheduling() {
                   </p>
                 </div>
                 <div className="w-8 h-8 bg-success/10 rounded-full flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-success" />
+                  <Calendar className="w-4 w-4 text-success" />
                 </div>
               </div>
             </CardContent>

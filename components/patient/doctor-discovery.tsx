@@ -153,16 +153,13 @@ export function DoctorDiscovery() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout 
+      headerContent={{
+        title: "Find Doctors",
+        description: "Discover and book appointments with qualified healthcare professionals"
+      }}
+    >
       <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">Find Doctors</h1>
-          <p className="text-muted-foreground">
-            Discover and book appointments with qualified healthcare professionals
-          </p>
-        </div>
-
         {/* Search and Filters */}
         <Card>
           <CardContent className="p-6">

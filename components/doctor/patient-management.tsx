@@ -129,20 +129,19 @@ export function PatientManagement() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Patient Management</h1>
-            <p className="text-muted-foreground">Manage your patient records and appointments</p>
-          </div>
+    <DashboardLayout 
+      headerContent={{
+        title: "Patient Management",
+        description: "Manage your patient records and appointments",
+        actions: (
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             Add Patient
           </Button>
-        </div>
-
+        )
+      }}
+    >
+      <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>

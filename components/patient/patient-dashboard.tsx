@@ -27,20 +27,19 @@ export function PatientDashboard() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Welcome, {user.name}</h1>
-            <p className="text-muted-foreground mt-1">Your health dashboard and medical records</p>
-          </div>
+    <DashboardLayout 
+      headerContent={{
+        title: `Welcome, ${user.name}`,
+        description: "Your health dashboard and medical records",
+        actions: (
           <Badge variant="secondary" className="bg-accent/10 text-accent">
             <Heart className="w-4 h-4 mr-2" />
             Healthy
           </Badge>
-        </div>
-
+        )
+      }}
+    >
+      <div className="space-y-6">
         {/* Health Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>

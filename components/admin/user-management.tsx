@@ -120,20 +120,19 @@ export function UserManagement() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">User Management</h1>
-            <p className="text-muted-foreground">Manage platform users and their permissions</p>
-          </div>
+    <DashboardLayout 
+      headerContent={{
+        title: "User Management",
+        description: "Manage platform users and their permissions",
+        actions: (
           <Button>
             <Users className="w-4 h-4 mr-2" />
             Add User
           </Button>
-        </div>
-
+        )
+      }}
+    >
+      <div className="space-y-6">
         {/* Filters */}
         <Card>
           <CardContent className="p-6">

@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Video, VideoOff, Mic, MicOff, PhoneOff, Share, Settings, Monitor, Users, Clock } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Video, VideoOff, Mic, MicOff, PhoneOff, Share, Settings, Monitor, Users, Clock, Send, Paperclip, FileText, FileImage, FileVideo, FileAudio, Download, MessageCircle } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -20,7 +21,10 @@ interface ChatMessage {
   sender: string
   message: string
   timestamp: string
-  type: "text" | "system"
+  type: "text" | "system" | "file" | "image" | "voice"
+  fileName?: string
+  fileSize?: string
+  fileUrl?: string
 }
 
 interface CallParticipant {
@@ -30,6 +34,16 @@ interface CallParticipant {
   isVideoOn: boolean
   isAudioOn: boolean
   isConnected: boolean
+}
+
+interface SharedFile {
+  id: string
+  name: string
+  size: string
+  type: "document" | "image" | "video" | "audio"
+  uploadedBy: string
+  uploadedAt: string
+  url: string
 }
 
 export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
@@ -44,9 +58,12 @@ export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
   const [participants, setParticipants] = useState<CallParticipant[]>([])
   const [notes, setNotes] = useState("")
   const [prescription, setPrescription] = useState("")
+  const [sharedFiles, setSharedFiles] = useState<SharedFile[]>([])
+  const [activeTab, setActiveTab] = useState("chat")
 
   const localVideoRef = useRef<HTMLVideoElement>(null)
   const remoteVideoRef = useRef<HTMLVideoElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -84,6 +101,35 @@ export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
           timestamp: new Date().toISOString(),
           type: "system",
         },
+        {
+          id: "2",
+          sender: parsedUser.role === "doctor" ? "Dr. Haider" : "Sarah Johnson",
+          message: "Hello! How are you feeling today?",
+          timestamp: new Date().toISOString(),
+          type: "text",
+        },
+      ])
+
+      // Mock shared files
+      setSharedFiles([
+        {
+          id: "1",
+          name: "Blood_Test_Results.pdf",
+          size: "2.4 MB",
+          type: "document",
+          uploadedBy: "Sarah Johnson",
+          uploadedAt: "2 minutes ago",
+          url: "#"
+        },
+        {
+          id: "2",
+          name: "ECG_Report.jpg",
+          size: "1.8 MB",
+          type: "image",
+          uploadedBy: "Sarah Johnson",
+          uploadedAt: "5 minutes ago",
+          url: "#"
+        }
       ])
     }
 
@@ -153,6 +199,48 @@ export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     }
   }
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const fileMessage: ChatMessage = {
+      id: Date.now().toString(),
+      sender: user?.name || "You",
+      message: `Shared file: ${file.name}`,
+      timestamp: new Date().toISOString(),
+      type: "file",
+      fileName: file.name,
+      fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      fileUrl: URL.createObjectURL(file)
+    }
+
+    setChatMessages([...chatMessages, fileMessage])
+    
+    // Add to shared files
+    const newFile: SharedFile = {
+      id: Date.now().toString(),
+      name: file.name,
+      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      type: file.type.startsWith('image/') ? 'image' : 
+            file.type.startsWith('video/') ? 'video' : 
+            file.type.startsWith('audio/') ? 'audio' : 'document',
+      uploadedBy: user?.name || "You",
+      uploadedAt: "Just now",
+      url: URL.createObjectURL(file)
+    }
+
+    setSharedFiles([...sharedFiles, newFile])
+  }
+
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case 'image': return <FileImage className="w-4 h-4" />
+      case 'video': return <FileVideo className="w-4 h-4" />
+      case 'audio': return <FileAudio className="w-4 h-4" />
+      default: return <FileText className="w-4 h-4" />
+    }
+  }
+
   if (!user) return null
 
   return (
@@ -173,6 +261,9 @@ export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
               <Users className="w-4 h-4" />
               <span className="text-sm">{participants.length} participants</span>
             </div>
+            <Badge variant="outline" className="bg-transparent">
+              Room: {roomId}
+            </Badge>
           </div>
 
           <div className="flex items-center gap-2">
@@ -260,11 +351,26 @@ export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
 
         {/* Side Panel */}
         <div className="lg:col-span-1">
-          <Tabs defaultValue="chat" className="h-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="chat">Chat</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-              {user.role === "doctor" && <TabsTrigger value="prescription">Rx</TabsTrigger>}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="chat">
+                <MessageCircle className="w-4 h-4 mr-1" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="files">
+                <FileText className="w-4 h-4 mr-1" />
+                Files
+              </TabsTrigger>
+              <TabsTrigger value="notes">
+                <FileText className="w-4 h-4 mr-1" />
+                Notes
+              </TabsTrigger>
+              {user.role === "doctor" && (
+                <TabsTrigger value="prescription">
+                  <FileText className="w-4 h-4 mr-1" />
+                  Rx
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="chat" className="space-y-4">
@@ -286,7 +392,18 @@ export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
                                 {new Date(msg.timestamp).toLocaleTimeString()}
                               </span>
                             </div>
-                            <div className="text-sm bg-muted p-2 rounded-lg">{msg.message}</div>
+                            <div className="text-sm bg-muted p-2 rounded-lg">
+                              {msg.type === 'text' && msg.message}
+                              {msg.type === 'file' && (
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4" />
+                                  <div>
+                                    <p className="font-medium">{msg.fileName}</p>
+                                    <p className="text-xs text-muted-foreground">{msg.fileSize}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -296,16 +413,69 @@ export function VideoCallRoom({ roomId }: VideoCallRoomProps) {
                   {/* Chat input */}
                   <div className="flex gap-2">
                     <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Paperclip className="w-4 h-4" />
+                    </Button>
+                    <Input
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Type a message..."
-                      className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                      className="flex-1"
                     />
                     <Button size="sm" onClick={sendMessage}>
-                      Send
+                      <Send className="w-4 h-4" />
                     </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="files" className="space-y-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">Shared Files</h3>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Paperclip className="w-4 h-4 mr-1" />
+                        Upload
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {sharedFiles.map((file) => (
+                        <div key={file.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            {getFileIcon(file.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{file.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {file.size} • {file.uploadedBy} • {file.uploadedAt}
+                            </p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

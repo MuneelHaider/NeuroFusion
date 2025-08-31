@@ -213,21 +213,13 @@ export function AIDiagnosisService() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout 
+      headerContent={{
+        title: "AI Diagnosis Assistant",
+        description: "AI-powered diagnostic support for clinical decision making"
+      }}
+    >
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Brain className="w-6 h-6 text-primary" />
-              </div>
-              AI Diagnosis Assistant
-            </h1>
-            <p className="text-muted-foreground">AI-powered diagnostic support for clinical decision making</p>
-          </div>
-        </div>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>

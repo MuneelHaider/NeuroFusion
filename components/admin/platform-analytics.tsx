@@ -75,15 +75,12 @@ export function PlatformAnalytics() {
   if (!analytics) return null
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Platform Analytics</h1>
-            <p className="text-muted-foreground">Comprehensive platform performance and usage analytics</p>
-          </div>
-          <div className="flex items-center gap-2">
+    <DashboardLayout 
+      headerContent={{
+        title: "Platform Analytics",
+        description: "Comprehensive platform performance and usage analytics",
+        actions: (
+          <>
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
@@ -98,10 +95,12 @@ export function PlatformAnalytics() {
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
-          </div>
-        </div>
-
-        {/* Key Metrics */}
+          </>
+        )
+      }}
+    >
+      <div className="space-y-6">
+        {/* Platform Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

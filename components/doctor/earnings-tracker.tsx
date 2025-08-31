@@ -34,6 +34,22 @@ const mockEarningsData: EarningsData[] = [
   { period: "This Year", revenue: 142800, appointments: 1020, avgPerAppointment: 140, growth: 15.7 },
 ]
 
+// Monthly revenue data for the chart
+const monthlyRevenueData = [
+  { month: "Jan", revenue: 11800, appointments: 84 },
+  { month: "Feb", revenue: 12200, appointments: 87 },
+  { month: "Mar", revenue: 11900, appointments: 85 },
+  { month: "Apr", revenue: 12500, appointments: 89 },
+  { month: "May", revenue: 12800, appointments: 91 },
+  { month: "Jun", revenue: 13100, appointments: 93 },
+  { month: "Jul", revenue: 12900, appointments: 92 },
+  { month: "Aug", revenue: 13300, appointments: 95 },
+  { month: "Sep", revenue: 13600, appointments: 97 },
+  { month: "Oct", revenue: 13900, appointments: 99 },
+  { month: "Nov", revenue: 14200, appointments: 101 },
+  { month: "Dec", revenue: 12450, appointments: 89 },
+]
+
 const mockTransactions: Transaction[] = [
   {
     id: "T001",
@@ -64,13 +80,157 @@ const mockTransactions: Transaction[] = [
   },
   {
     id: "T004",
-    date: "2024-12-12",
+    date: "2024-12-13",
     patientName: "David Wilson",
     service: "Prescription Review",
     amount: 80,
     status: "overdue",
     paymentMethod: "Credit Card",
   },
+  {
+    id: "T005",
+    date: "2024-12-12",
+    patientName: "Jennifer Lee",
+    service: "Emergency Consultation",
+    amount: 250,
+    status: "paid",
+    paymentMethod: "Insurance",
+  },
+  {
+    id: "T006",
+    date: "2024-12-12",
+    patientName: "Robert Brown",
+    service: "Cardiac Stress Test",
+    amount: 300,
+    status: "paid",
+    paymentMethod: "Credit Card",
+  },
+  {
+    id: "T007",
+    date: "2024-12-11",
+    patientName: "Lisa Anderson",
+    service: "Routine Checkup",
+    amount: 150,
+    status: "paid",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "T008",
+    date: "2024-12-11",
+    patientName: "James Martinez",
+    service: "Follow-up Visit",
+    amount: 120,
+    status: "pending",
+    paymentMethod: "Insurance",
+  },
+  {
+    id: "T009",
+    date: "2024-12-10",
+    patientName: "Amanda Taylor",
+    service: "Specialist Consultation",
+    amount: 200,
+    status: "paid",
+    paymentMethod: "Credit Card",
+  },
+  {
+    id: "T010",
+    date: "2024-12-10",
+    patientName: "Christopher Garcia",
+    service: "Prescription Review",
+    amount: 80,
+    status: "paid",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "T011",
+    date: "2024-12-09",
+    patientName: "Nicole White",
+    service: "Echocardiogram",
+    amount: 400,
+    status: "paid",
+    paymentMethod: "Insurance",
+  },
+  {
+    id: "T012",
+    date: "2024-12-09",
+    patientName: "Kevin Johnson",
+    service: "Routine Checkup",
+    amount: 150,
+    status: "overdue",
+    paymentMethod: "Credit Card",
+  },
+  {
+    id: "T013",
+    date: "2024-12-08",
+    patientName: "Rachel Davis",
+    service: "Follow-up Visit",
+    amount: 120,
+    status: "paid",
+    paymentMethod: "Insurance",
+  },
+  {
+    id: "T014",
+    date: "2024-12-08",
+    patientName: "Thomas Miller",
+    service: "Emergency Consultation",
+    amount: 250,
+    status: "paid",
+    paymentMethod: "Credit Card",
+  },
+  {
+    id: "T015",
+    date: "2024-12-07",
+    patientName: "Jessica Thompson",
+    service: "Cardiac MRI",
+    amount: 600,
+    status: "pending",
+    paymentMethod: "Insurance",
+  },
+  {
+    id: "T016",
+    date: "2024-12-07",
+    patientName: "Daniel Clark",
+    service: "Prescription Review",
+    amount: 80,
+    status: "paid",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "T017",
+    date: "2024-12-06",
+    patientName: "Stephanie Lewis",
+    service: "Routine Checkup",
+    amount: 150,
+    status: "paid",
+    paymentMethod: "Credit Card",
+  },
+  {
+    id: "T018",
+    date: "2024-12-06",
+    patientName: "Ryan Hall",
+    service: "Specialist Consultation",
+    amount: 200,
+    status: "paid",
+    paymentMethod: "Insurance",
+  },
+  {
+    id: "T019",
+    date: "2024-12-05",
+    patientName: "Megan Allen",
+    service: "Follow-up Visit",
+    amount: 120,
+    status: "paid",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "T020",
+    date: "2024-12-05",
+    patientName: "Andrew Young",
+    service: "Emergency Consultation",
+    amount: 250,
+    status: "overdue",
+    paymentMethod: "Credit Card",
+  }
 ]
 
 export function EarningsTracker() {
@@ -107,15 +267,12 @@ export function EarningsTracker() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Earnings & Revenue</h1>
-            <p className="text-muted-foreground">Track your practice revenue and financial performance</p>
-          </div>
-          <div className="flex items-center gap-2">
+    <DashboardLayout 
+      headerContent={{
+        title: "Earnings & Revenue",
+        description: "Track your practice revenue and financial performance",
+        actions: (
+          <>
             <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export Report
@@ -131,9 +288,11 @@ export function EarningsTracker() {
                 <SelectItem value="This Year">This Year</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-        </div>
-
+          </>
+        )
+      }}
+    >
+      <div className="space-y-6">
         {/* Revenue Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
@@ -260,22 +419,179 @@ export function EarningsTracker() {
           </CardContent>
         </Card>
 
-        {/* Revenue Chart Placeholder */}
+        {/* Revenue Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Revenue Trends</CardTitle>
-            <CardDescription>Monthly revenue performance over time</CardDescription>
+            <CardDescription>Monthly revenue performance over the last 12 months</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-muted/20 rounded-lg flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Revenue chart will be displayed here</p>
-                <p className="text-sm">Integration with charting library needed</p>
+            <div className="h-80 w-full">
+              <svg width="100%" height="100%" viewBox="0 0 800 300" className="overflow-visible">
+                {/* Chart background */}
+                <rect width="800" height="300" fill="transparent" />
+                
+                {/* Y-axis labels */}
+                <text x="20" y="20" fill="#6b7280" fontSize="12" textAnchor="end">$15k</text>
+                <text x="20" y="80" fill="#6b7280" fontSize="12" textAnchor="end">$12k</text>
+                <text x="20" y="140" fill="#6b7280" fontSize="12" textAnchor="end">$9k</text>
+                <text x="20" y="200" fill="#6b7280" fontSize="12" textAnchor="end">$6k</text>
+                <text x="20" y="260" fill="#6b7280" fontSize="12" textAnchor="end">$3k</text>
+                
+                {/* Grid lines */}
+                <line x1="60" y1="20" x2="800" y2="20" stroke="#e5e7eb" strokeWidth="1" />
+                <line x1="60" y1="80" x2="800" y2="80" stroke="#e5e7eb" strokeWidth="1" />
+                <line x1="60" y1="140" x2="800" y2="140" stroke="#e5e7eb" strokeWidth="1" />
+                <line x1="60" y1="200" x2="800" y2="200" stroke="#e5e7eb" strokeWidth="1" />
+                <line x1="60" y1="260" x2="800" y2="260" stroke="#e5e7eb" strokeWidth="1" />
+                
+                {/* Revenue line chart */}
+                <polyline
+                  points={monthlyRevenueData.map((data, index) => {
+                    const x = 60 + (index * 60)
+                    const y = 260 - ((data.revenue - 3000) / 12000) * 240
+                    return `${x},${y}`
+                  }).join(' ')}
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                
+                {/* Data points */}
+                {monthlyRevenueData.map((data, index) => {
+                  const x = 60 + (index * 60)
+                  const y = 260 - ((data.revenue - 3000) / 12000) * 240
+                  return (
+                    <g key={index}>
+                      <circle cx={x} cy={y} r="4" fill="#3b82f6" />
+                      <circle cx={x} cy={y} r="8" fill="#3b82f6" fillOpacity="0.2" />
+                    </g>
+                  )
+                })}
+                
+                {/* X-axis labels */}
+                {monthlyRevenueData.map((data, index) => {
+                  const x = 60 + (index * 60)
+                  return (
+                    <g key={index}>
+                      <text x={x} y="290" fill="#6b7280" fontSize="12" textAnchor="middle">
+                        {data.month}
+                      </text>
+                      <text x={x} y="305" fill="#6b7280" fontSize="10" textAnchor="middle">
+                        ${(data.revenue / 1000).toFixed(1)}k
+                      </text>
+                    </g>
+                  )
+                })}
+                
+                {/* Chart title */}
+                <text x="400" y="15" fill="#111827" fontSize="16" fontWeight="600" textAnchor="middle">
+                  Monthly Revenue Trend
+                </text>
+              </svg>
+            </div>
+            
+            {/* Chart legend */}
+            <div className="flex items-center justify-center gap-6 mt-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Revenue</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500/20 rounded-full"></div>
+                <span>Data Points</span>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Financial Summary */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Methods Breakdown</CardTitle>
+              <CardDescription>Revenue distribution by payment method</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm">Insurance</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">$8,450</p>
+                  <p className="text-xs text-muted-foreground">68% of total</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                  <span className="text-sm">Credit Card</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">$2,800</p>
+                  <p className="text-xs text-muted-foreground">22% of total</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                  <span className="text-sm">Cash</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">$1,200</p>
+                  <p className="text-xs text-muted-foreground">10% of total</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Service Revenue Breakdown</CardTitle>
+              <CardDescription>Revenue by service type</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Routine Checkups</span>
+                <div className="text-right">
+                  <p className="font-medium">$4,200</p>
+                  <p className="text-xs text-muted-foreground">34%</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Specialist Consultations</span>
+                <div className="text-right">
+                  <p className="font-medium">$3,600</p>
+                  <p className="text-xs text-muted-foreground">29%</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Emergency Consultations</span>
+                <div className="text-right">
+                  <p className="font-medium">$2,250</p>
+                  <p className="text-xs text-muted-foreground">18%</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Diagnostic Tests</span>
+                <div className="text-right">
+                  <p className="font-medium">$1,800</p>
+                  <p className="text-xs text-muted-foreground">14%</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Other Services</span>
+                <div className="text-right">
+                  <p className="font-medium">$600</p>
+                  <p className="text-xs text-muted-foreground">5%</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   )

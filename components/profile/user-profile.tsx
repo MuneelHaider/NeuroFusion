@@ -58,11 +58,10 @@ export function UserProfile() {
   if (!user || !formData) return null
 
   return (
-    <DashboardLayout user={user}>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Profile Settings</h1>
-          <p className="text-muted-foreground">Manage your account information and preferences</p>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Profile</h1>
         </div>
 
         {message && (
@@ -89,7 +88,8 @@ export function UserProfile() {
               <div>
                 <h3 className="font-semibold">{user.name}</h3>
                 <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
-                {user.role === "doctor" && user.specialty && (
+                {/* Check if role is doctor (case-insensitive) */}
+                {user.role.toLowerCase() === "doctor" && user.specialty && (
                   <p className="text-sm text-muted-foreground">{user.specialty}</p>
                 )}
               </div>
@@ -123,7 +123,8 @@ export function UserProfile() {
                 </div>
               </div>
 
-              {user.role === "doctor" && (
+              {/* Show specialty and license fields for doctors (case-insensitive) */}
+              {user.role.toLowerCase() === "doctor" && (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="specialty">Medical Specialty</Label>

@@ -218,20 +218,12 @@ export function MedicalImagingViewer() {
   if (!user) return null
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <FileImage className="w-6 h-6 text-primary" />
-              </div>
-              Medical Imaging Viewer
-            </h1>
-            <p className="text-muted-foreground">Advanced medical image viewing and analysis</p>
-          </div>
-          <div className="flex items-center gap-2">
+    <DashboardLayout 
+      headerContent={{
+        title: "Medical Imaging Viewer",
+        description: "Advanced medical image viewing and analysis",
+        actions: (
+          <>
             <Button variant="outline">
               <Upload className="w-4 h-4 mr-2" />
               Upload Images
@@ -240,9 +232,11 @@ export function MedicalImagingViewer() {
               <Share className="w-4 h-4 mr-2" />
               Share Study
             </Button>
-          </div>
-        </div>
-
+          </>
+        )
+      }}
+    >
+      <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Image Library */}
           <Card className="lg:col-span-1">

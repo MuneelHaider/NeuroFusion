@@ -1,32 +1,35 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Mail, Lock, User, Stethoscope, Users } from "lucide-react"
+import { Loader2, Mail, Lock, User, Stethoscope, Users, Shield } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
 
 export function RegisterForm() {
-  const searchParams = useSearchParams()
-  const defaultRole = searchParams.get("role") || "patient"
-
   const [formData, setFormData] = useState({
-    name: "",
+    role: "patient",
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: defaultRole,
     specialty: "",
     licenseNumber: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { signup } = useAuth()
+
+  // Helper function to normalize role for comparison
+  const normalizeRole = (role: string): string => {
+    return role.toLowerCase()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,32 +48,19 @@ export function RegisterForm() {
         return
       }
 
-      if (formData.role === "doctor" && (!formData.specialty || !formData.licenseNumber)) {
+      // Check if role is doctor (case-insensitive)
+      if (normalizeRole(formData.role) === "doctor" && (!formData.specialty || !formData.licenseNumber)) {
         setError("Specialty and license number are required for doctors")
         return
       }
 
-      // Mock registration - replace with real auth later
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Mock user data
-      const userData = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        role: formData.role,
-        specialty: formData.specialty,
-        licenseNumber: formData.licenseNumber,
-      }
-
-      // Store user data (replace with proper auth)
-      localStorage.setItem("user", JSON.stringify(userData))
-
-      // Redirect based on role
-      if (userData.role === "doctor") {
-        router.push("/doctor/dashboard")
+      const result = await signup(formData)
+      
+      if (result.success) {
+        // Redirect to login page after successful registration
+        router.push("/auth/login?message=Account created successfully! Please log in.")
       } else {
-        router.push("/patient/dashboard")
+        setError(result.message)
       }
     } catch (err) {
       setError("Registration failed. Please try again.")
@@ -97,7 +87,7 @@ export function RegisterForm() {
             <SelectItem value="doctor">
               <div className="flex items-center gap-2">
                 <Stethoscope className="h-4 w-4" />
-                Doctor
+                Healthcare Provider
               </div>
             </SelectItem>
             <SelectItem value="patient">
@@ -106,20 +96,26 @@ export function RegisterForm() {
                 Patient
               </div>
             </SelectItem>
+            <SelectItem value="admin">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Administrator
+              </div>
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
+        <Label htmlFor="fullName">Full Name</Label>
         <div className="relative">
           <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            id="name"
+            id="fullName"
             type="text"
             placeholder="Dr. John Smith"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            value={formData.fullName}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             className="pl-10"
             required
           />
@@ -142,7 +138,8 @@ export function RegisterForm() {
         </div>
       </div>
 
-      {formData.role === "doctor" && (
+      {/* Show specialty and license fields for doctors (case-insensitive) */}
+      {normalizeRole(formData.role) === "doctor" && (
         <>
           <div className="space-y-2">
             <Label htmlFor="specialty">Medical Specialty</Label>

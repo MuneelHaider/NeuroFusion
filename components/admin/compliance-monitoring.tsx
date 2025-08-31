@@ -151,23 +151,22 @@ export function ComplianceMonitoring() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Compliance Monitoring</h1>
-            <p className="text-muted-foreground">Monitor regulatory compliance and audit trails</p>
-          </div>
-          <div className="flex items-center gap-2">
+    <DashboardLayout 
+      headerContent={{
+        title: "Compliance Monitoring",
+        description: "Monitor regulatory compliance and audit trails",
+        actions: (
+          <>
             <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export Report
             </Button>
             <Button>Run Audit</Button>
-          </div>
-        </div>
-
+          </>
+        )
+      }}
+    >
+      <div className="space-y-6">
         <Tabs defaultValue="reports" className="space-y-4">
           <TabsList>
             <TabsTrigger value="reports">Compliance Reports</TabsTrigger>

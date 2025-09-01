@@ -1,16 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Loader2, Mail, Phone, MessageSquare, User, MapPin, ArrowRight, Brain, Shield, Zap, Sparkles, Globe, Users, Rocket } from "lucide-react"
+import { Mail, Phone, MessageSquare, User, MapPin, ArrowRight, Brain, Shield, Zap, Sparkles, Globe, Users, Rocket, CheckCircle } from "lucide-react"
 import Image from "next/image"
 
 export function ContactForm() {
-  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -19,48 +18,60 @@ export function ContactForm() {
     message: "",
     requestAccess: false,
   })
+  const [showSuccess, setShowSuccess] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // Using EmailJS or similar service would be better here
-      // For now, we'll use a simple approach that can be easily replaced
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        alert("Thank you! Your message has been sent successfully. We'll get back to you soon.")
-        setFormData({ 
-          fullName: "", 
-          email: "", 
-          phone: "", 
-          location: "", 
-          message: "", 
-          requestAccess: false 
-        })
-      } else {
-        alert("Failed to send message. Please try again or contact us directly.")
+  // Check for success parameter in URL after FormSubmit redirect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.get('success') === 'true') {
+        setShowSuccess(true)
+        // Clear the URL parameter
+        window.history.replaceState({}, document.title, window.location.pathname)
+        // Auto-hide after 5 seconds
+        setTimeout(() => setShowSuccess(false), 5000)
       }
-    } catch (error) {
-      alert("Something went wrong. Please try again or contact us directly.")
-    } finally {
-      setIsLoading(false)
     }
-  }
+  }, [])
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const closeSuccessPopup = () => {
+    setShowSuccess(false)
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-start">
+    <>
+      {/* Success Popup */}
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-white/20 animate-in fade-in-0 zoom-in-95 duration-300">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-in zoom-in-95 duration-500">
+                <CheckCircle className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Message Sent Successfully!</h3>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                Thank you for contacting us. We'll get back to you soon!
+              </p>
+              <Button 
+                onClick={closeSuccessPopup}
+                className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <form 
+        action="https://formsubmit.co/muneelhaider@gmail.com" 
+        method="POST"
+        className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-start"
+      >
       {/* Left Column - Hero & Information */}
       <div className="space-y-10">
         {/* Hero Section */}
@@ -143,122 +154,134 @@ export function ContactForm() {
                 <p className="text-slate-600">Tell us about yourself and how you'd like to get involved with our project.</p>
               </div>
 
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-slate-700 font-medium">Full Name *</Label>
-                  <div className="relative group">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                    <Input
-                      id="fullName"
-                      placeholder="Enter your full name"
-                      value={formData.fullName}
-                      onChange={(e) => handleInputChange("fullName", e.target.value)}
-                      className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
-                      required
-                    />
-                  </div>
-                </div>
+                                                                       <div className="space-y-5">
+                        {/* Hidden fields for FormSubmit configuration */}
+                        <input type="hidden" name="_next" value={typeof window !== 'undefined' ? window.location.origin + '/auth/register?success=true' : ''} />
+                        <input type="hidden" name="_replyto" value={formData.email} />
+                        <input type="hidden" name="_cc" value="khawajamurad@outlook.com" />
+                        <input type="hidden" name="_subject" value="NeuroFusion Interest - New Contact Form Submission" />
+                        <input type="hidden" name="_template" value="table" />
+                        <input type="hidden" name="_captcha" value="false" />
+                        {/* Honeypot field for spam protection */}
+                        <input type="text" name="_honey" style={{display: 'none'}} tabIndex={-1} autoComplete="off" />
+                       
+                                            <div className="space-y-2">
+                       <Label htmlFor="fullName" className="text-slate-700 font-medium">Full Name *</Label>
+                       <div className="relative group">
+                         <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                         <Input
+                           id="fullName"
+                           name="name"
+                           placeholder="Enter your full name"
+                           value={formData.fullName}
+                           onChange={(e) => handleInputChange("fullName", e.target.value)}
+                           className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
+                           required
+                         />
+                       </div>
+                     </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-700 font-medium">Email Address *</Label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email address"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
-                      required
-                    />
-                  </div>
-                </div>
+                                     <div className="space-y-2">
+                       <Label htmlFor="email" className="text-slate-700 font-medium">Email Address *</Label>
+                       <div className="relative group">
+                         <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                         <Input
+                           id="email"
+                           name="email"
+                           type="email"
+                           placeholder="Enter your email address"
+                           value={formData.email}
+                           onChange={(e) => handleInputChange("email", e.target.value)}
+                           className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
+                           required
+                         />
+                       </div>
+                     </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-slate-700 font-medium">Phone Number</Label>
-                    <div className="relative group">
-                      <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="Enter phone number"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
-                        className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="location" className="text-slate-700 font-medium">Location</Label>
-                    <div className="relative group">
-                      <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                      <Input
-                        id="location"
-                        placeholder="Enter your location"
-                        value={formData.location}
-                        onChange={(e) => handleInputChange("location", e.target.value)}
-                        className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
-                      />
-                    </div>
-                  </div>
+                                           <div className="space-y-2">
+                           <Label htmlFor="phone" className="text-slate-700 font-medium">Phone Number</Label>
+                           <div className="relative group">
+                             <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                             <Input
+                               id="phone"
+                               name="phone"
+                               type="tel"
+                               placeholder="Enter phone number"
+                               value={formData.phone}
+                               onChange={(e) => handleInputChange("phone", e.target.value)}
+                               className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
+                             />
+                           </div>
+                         </div>
+                         
+                         <div className="space-y-2">
+                           <Label htmlFor="location" className="text-slate-700 font-medium">Location</Label>
+                           <div className="relative group">
+                             <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                             <Input
+                               id="location"
+                               name="location"
+                               placeholder="Enter your location"
+                               value={formData.location}
+                               onChange={(e) => handleInputChange("location", e.target.value)}
+                               className="pl-12 h-14 bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400"
+                             />
+                           </div>
+                         </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message" className="text-slate-700 font-medium">
-                    Tell Us About Yourself *
-                  </Label>
-                  <div className="relative group">
-                    <MessageSquare className="absolute left-4 top-4 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                    <Textarea
-                      id="message"
-                      placeholder="What interests you about NeuroFusion? Are you looking to collaborate, invest, or learn more? Tell us about your background and interests..."
-                      value={formData.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
-                      className="pl-12 min-h-[140px] bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400 resize-none"
-                      required
-                    />
-                  </div>
-                </div>
+                                     <div className="space-y-2">
+                       <Label htmlFor="message" className="text-slate-700 font-medium">
+                         Tell Us About Yourself *
+                       </Label>
+                       <div className="relative group">
+                         <MessageSquare className="absolute left-4 top-4 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                         <Textarea
+                           id="message"
+                           name="message"
+                           placeholder="What interests you about NeuroFusion? Are you looking to collaborate, invest, or learn more? Tell us about your background and interests..."
+                           value={formData.message}
+                           onChange={(e) => handleInputChange("message", e.target.value)}
+                           className="pl-12 min-h-[140px] bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400 resize-none"
+                           required
+                         />
+                       </div>
+                     </div>
 
-                <div className="flex items-center space-x-3 p-4 rounded-xl bg-blue-50/50 border border-blue-200/30">
-                  <Checkbox
-                    id="requestAccess"
-                    checked={formData.requestAccess}
-                    onCheckedChange={(checked) => 
-                      handleInputChange("requestAccess", checked as boolean)
-                    }
-                    className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                  />
-                  <Label htmlFor="requestAccess" className="text-sm font-medium text-slate-700 cursor-pointer">
-                    I'm interested in getting early access to the NeuroFusion platform
-                  </Label>
-                </div>
+                                     <div className="flex items-center space-x-3 p-4 rounded-xl bg-blue-50/50 border border-blue-200/30">
+                       <Checkbox
+                         id="requestAccess"
+                         checked={formData.requestAccess}
+                         onCheckedChange={(checked) => 
+                           handleInputChange("requestAccess", checked as boolean)
+                         }
+                         className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                       />
+                       <Label htmlFor="requestAccess" className="text-sm font-medium text-slate-700 cursor-pointer">
+                         I'm interested in getting early access to the NeuroFusion platform
+                       </Label>
+                       {/* Hidden field to send checkbox value to FormSubmit */}
+                       <input 
+                         type="hidden" 
+                         name="requestAccess" 
+                         value={formData.requestAccess ? "Yes" : "No"} 
+                       />
+                     </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-3 w-6 h-6 animate-spin" />
-                      Sending Message...
-                    </>
-                  ) : (
-                    <>
-                      <span>SUBMIT INTEREST</span>
-                      <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </Button>
+                                 <Button 
+                   type="submit" 
+                   className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
+                 >
+                   <span>SUBMIT INTEREST</span>
+                   <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                 </Button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </form>
+    </>
   )
 }

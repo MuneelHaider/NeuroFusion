@@ -134,46 +134,11 @@
   }
   
   html {
-    font-size: 18px; /* Increased from default 16px */
     scroll-behavior: smooth;
   }
   
   body {
     @apply bg-background text-foreground;
-    font-size: 1rem; /* This will now be 18px */
-    line-height: 1.6;
-  }
-  
-  /* Increase base text sizes for better readability */
-  p {
-    font-size: 1.125rem; /* 18px */
-    line-height: 1.7;
-  }
-  
-  /* Make form labels more readable */
-  label {
-    font-size: 1.125rem; /* 18px */
-    font-weight: 500;
-  }
-  
-  /* Increase input text size */
-  input, textarea, select {
-    font-size: 1.125rem; /* 18px */
-  }
-  
-  /* Make buttons text larger */
-  button {
-    font-size: 1.125rem; /* 18px */
-  }
-  
-  /* Increase link text size */
-  a {
-    font-size: 1.125rem; /* 18px */
-  }
-  
-  /* Make small text more readable */
-  small {
-    font-size: 1rem; /* 18px instead of default 14px */
   }
 }
 

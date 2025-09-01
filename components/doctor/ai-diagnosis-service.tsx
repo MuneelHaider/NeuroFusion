@@ -667,7 +667,7 @@ export function AIDiagnosisService() {
               // Create download link
               const link = document.createElement('a')
               link.href = url
-              link.download = 'neurofusion-ai-diagnosis-report-${data.reportNumber}.docx'
+              link.download = 'NeuroFusion-ai-diagnosis-report-${data.reportNumber}.docx'
               document.body.appendChild(link)
               link.click()
               document.body.removeChild(link)

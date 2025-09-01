@@ -326,8 +326,8 @@ export default function HomePage() {
                 </div>
                 <div className="mt-4">
                   <p className="font-medium">For more information email us at:</p>
-                  <a href="mailto:support@neurofusion.com" className="text-primary hover:underline">
-                    support@neurofusion.com
+                  <a href="mailto:support@NeuroFusion.com" className="text-primary hover:underline">
+                    support@NeuroFusion.com
                   </a>
                 </div>
               </div>

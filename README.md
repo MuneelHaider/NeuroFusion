@@ -33,7 +33,7 @@ A modern, AI-powered healthcare platform built with Next.js, MongoDB, and TypeSc
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd neurofusion
+   cd NeuroFusion
    ```
 
 2. **Install dependencies**
@@ -47,7 +47,7 @@ A modern, AI-powered healthcare platform built with Next.js, MongoDB, and TypeSc
    Create a `.env` file in the root directory:
    ```env
    # MongoDB Connection String
-   MONGODB_URI=mongodb+srv://DevTeam:q1w2e3r4@neurofusion.oeogigk.mongodb.net/
+   MONGODB_URI=mongodb+srv://DevTeam:q1w2e3r4@NeuroFusion.oeogigk.mongodb.net/
    
    # JWT Secret Key (change this in production)
    JWT_SECRET=ABC@123
@@ -56,15 +56,15 @@ A modern, AI-powered healthcare platform built with Next.js, MongoDB, and TypeSc
    NODE_ENV=development
    
    # Database Name (optional - will use default from connection string)
-   MONGODB_DB=neurofusion
+   MONGODB_DB=NeuroFusion
    
    # Server Configuration
    PORT=3000
    HOST=localhost
    
    # Security
-   COOKIE_SECRET=neurofusion-cookie-secret-2024
-   SESSION_SECRET=neurofusion-session-secret-2024
+   COOKIE_SECRET=NeuroFusion-cookie-secret-2024
+   SESSION_SECRET=NeuroFusion-session-secret-2024
    
    # API Configuration
    API_BASE_URL=http://localhost:3000
@@ -200,7 +200,7 @@ The following environment variables are required in your `.env` file:
 | `MONGODB_URI` | MongoDB connection string | `mongodb+srv://user:pass@cluster.mongodb.net/` |
 | `JWT_SECRET` | Secret key for JWT tokens | `your-secret-key-here` |
 | `NODE_ENV` | Environment mode | `development` or `production` |
-| `MONGODB_DB` | Database name (optional) | `neurofusion` |
+| `MONGODB_DB` | Database name (optional) | `NeuroFusion` |
 | `PORT` | Server port (optional) | `3000` |
 | `HOST` | Server host (optional) | `localhost` |
 

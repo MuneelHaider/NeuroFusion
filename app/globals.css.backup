@@ -4,44 +4,44 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated to white and blue theme */
+  /* Updated to white and green medical theme */
   --background: #ffffff;
   --foreground: #1f2937;
   --card: #ffffff;
   --card-foreground: #1f2937;
   --popover: #ffffff;
   --popover-foreground: #1f2937;
-  --primary: #3b82f6; /* Primary blue */
+  --primary: #4caf50; /* Medical green */
   --primary-foreground: #ffffff;
-  --secondary: #f8fafc;
+  --secondary: #f8faf8;
   --secondary-foreground: #1f2937;
   --muted: #f1f5f9;
   --muted-foreground: #6b7280;
-  --accent: #93c5fd; /* Light blue accent */
+  --accent: #a5d6a7; /* Light green accent */
   --accent-foreground: #1f2937;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --success: #10b981;
+  --success: #4caf50;
   --success-foreground: #ffffff;
   --warning: #f59e0b;
   --warning-foreground: #ffffff;
   --border: #e5e7eb;
   --input: #f9fafb;
-  --ring: rgba(59, 130, 246, 0.3);
-  --chart-1: #3b82f6;
-  --chart-2: #93c5fd;
-  --chart-3: #1d4ed8;
-  --chart-4: #dbeafe;
-  --chart-5: #1e40af;
+  --ring: rgba(76, 175, 80, 0.3);
+  --chart-1: #4caf50;
+  --chart-2: #a5d6a7;
+  --chart-3: #388e3c;
+  --chart-4: #c8e6c9;
+  --chart-5: #1b5e20;
   --radius: 0.5rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #1f2937;
-  --sidebar-primary: #3b82f6;
+  --sidebar-primary: #4caf50;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f8fafc;
+  --sidebar-accent: #f8faf8;
   --sidebar-accent-foreground: #1f2937;
   --sidebar-border: #e5e7eb;
-  --sidebar-ring: rgba(59, 130, 246, 0.3);
+  --sidebar-ring: rgba(76, 175, 80, 0.3);
 }
 
 .dark {
@@ -51,36 +51,36 @@
   --card-foreground: #f8fafc;
   --popover: #1e293b;
   --popover-foreground: #f8fafc;
-  --primary: #3b82f6;
+  --primary: #4caf50;
   --primary-foreground: #ffffff;
   --secondary: #334155;
   --secondary-foreground: #f8fafc;
   --muted: #334155;
   --muted-foreground: #94a3b8;
-  --accent: #93c5fd;
+  --accent: #a5d6a7;
   --accent-foreground: #0f172a;
   --destructive: #ef4444;
   --destructive-foreground: #f8fafc;
-  --success: #10b981;
+  --success: #4caf50;
   --success-foreground: #ffffff;
   --warning: #f59e0b;
   --warning-foreground: #ffffff;
   --border: #334155;
   --input: #334155;
-  --ring: rgba(59, 130, 246, 0.3);
-  --chart-1: #3b82f6;
-  --chart-2: #93c5fd;
-  --chart-3: #1d4ed8;
-  --chart-4: #dbeafe;
-  --chart-5: #1e40af;
+  --ring: rgba(76, 175, 80, 0.3);
+  --chart-1: #4caf50;
+  --chart-2: #a5d6a7;
+  --chart-3: #388e3c;
+  --chart-4: #c8e6c9;
+  --chart-5: #1b5e20;
   --sidebar: #1e293b;
   --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #3b82f6;
+  --sidebar-primary: #4caf50;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #334155;
   --sidebar-accent-foreground: #f8fafc;
   --sidebar-border: #334155;
-  --sidebar-ring: rgba(59, 130, 246, 0.3);
+  --sidebar-ring: rgba(76, 175, 80, 0.3);
 }
 
 @theme inline {
@@ -132,48 +132,8 @@
   * {
     @apply border-border outline-ring/50;
   }
-  
-  html {
-    font-size: 18px; /* Increased from default 16px */
-    scroll-behavior: smooth;
-  }
-  
   body {
     @apply bg-background text-foreground;
-    font-size: 1rem; /* This will now be 18px */
-    line-height: 1.6;
-  }
-  
-  /* Increase base text sizes for better readability */
-  p {
-    font-size: 1.125rem; /* 18px */
-    line-height: 1.7;
-  }
-  
-  /* Make form labels more readable */
-  label {
-    font-size: 1.125rem; /* 18px */
-    font-weight: 500;
-  }
-  
-  /* Increase input text size */
-  input, textarea, select {
-    font-size: 1.125rem; /* 18px */
-  }
-  
-  /* Make buttons text larger */
-  button {
-    font-size: 1.125rem; /* 18px */
-  }
-  
-  /* Increase link text size */
-  a {
-    font-size: 1.125rem; /* 18px */
-  }
-  
-  /* Make small text more readable */
-  small {
-    font-size: 1rem; /* 18px instead of default 14px */
   }
 }
 
@@ -240,13 +200,13 @@
   }
 }
 
-@keyframes pulse-blue {
+@keyframes pulse-green {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
   }
 }
 
@@ -286,8 +246,8 @@
   animation: float 3s ease-in-out infinite;
 }
 
-.animate-pulse-blue {
-  animation: pulse-blue 2s infinite;
+.animate-pulse-green {
+  animation: pulse-green 2s infinite;
 }
 
 /* Animation delays */

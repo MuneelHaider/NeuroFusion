@@ -81,7 +81,7 @@ export function ContactForm() {
           </h2>
           
           <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-            NeuroFusion is an innovative medical AI project. We're looking for passionate individuals, potential clients, and partners who want to be part of this revolutionary healthcare technology.
+            NeuroFusion is a research-driven telemedicine and clinical AI initiative. We're seeking researchers, clinicians, and collaborators interested in advancing medical AI, including our world's first AI system for brain tumor diagnosis.
           </p>
         </div>
 
@@ -91,24 +91,24 @@ export function ContactForm() {
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <Brain className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-semibold text-slate-800 mb-1">AI-Powered</h3>
-            <p className="text-sm text-slate-600">Advanced machine learning algorithms</p>
+            <h3 className="font-semibold text-slate-800 mb-1">Research-Grade AI</h3>
+            <p className="text-sm text-slate-600">Clinical AI including brain tumor diagnosis</p>
           </div>
           
           <div className="group text-center p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-200/30 hover:border-blue-300/50 transition-all duration-300 hover:-translate-y-2">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <Shield className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-semibold text-slate-800 mb-1">Enterprise Secure</h3>
-            <p className="text-sm text-slate-600">HIPAA compliant & SOC 2 certified</p>
+            <h3 className="font-semibold text-slate-800 mb-1">Research Secure</h3>
+            <p className="text-sm text-slate-600">Privacy-preserving telemedicine platform</p>
           </div>
           
           <div className="group text-center p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-200/30 hover:border-blue-300/50 transition-all duration-300 hover:-translate-y-2">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <Rocket className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-semibold text-slate-800 mb-1">Lightning Fast</h3>
-            <p className="text-sm text-slate-600">Real-time processing & analysis</p>
+            <h3 className="font-semibold text-slate-800 mb-1">Clinical Focus</h3>
+            <p className="text-sm text-slate-600">Evidence-based AI for medical diagnosis</p>
           </div>
         </div>
 
@@ -151,7 +151,7 @@ export function ContactForm() {
             <div className="space-y-6">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-slate-800 mb-2">Interested in NeuroFusion?</h3>
-                <p className="text-slate-600">Tell us about yourself and how you'd like to get involved with our project.</p>
+                <p className="text-slate-600">Tell us about your research interests and how you'd like to collaborate with our initiative.</p>
               </div>
 
                                                                        <div className="space-y-5">
@@ -240,7 +240,7 @@ export function ContactForm() {
                          <Textarea
                            id="message"
                            name="message"
-                           placeholder="What interests you about NeuroFusion? Are you looking to collaborate, invest, or learn more? Tell us about your background and interests..."
+                           placeholder="What interests you about NeuroFusion? Are you looking to collaborate on research, contribute to clinical AI development, or learn more? Tell us about your background and research interests..."
                            value={formData.message}
                            onChange={(e) => handleInputChange("message", e.target.value)}
                            className="pl-12 min-h-[140px] bg-white/60 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-300 text-slate-800 placeholder:text-slate-400 resize-none"
@@ -259,7 +259,7 @@ export function ContactForm() {
                          className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                        />
                        <Label htmlFor="requestAccess" className="text-sm font-medium text-slate-700 cursor-pointer">
-                         I'm interested in getting early access to the NeuroFusion platform
+                         I'm interested in research collaboration or early access to the NeuroFusion platform
                        </Label>
                        {/* Hidden field to send checkbox value to FormSubmit */}
                        <input 
@@ -273,7 +273,7 @@ export function ContactForm() {
                    type="submit" 
                    className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
                  >
-                   <span>SUBMIT INTEREST</span>
+                   <span>SUBMIT COLLABORATION INTEREST</span>
                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
                  </Button>
               </div>

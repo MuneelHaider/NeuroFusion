@@ -43,7 +43,7 @@ export default function RegisterPage() {
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
                 NeuroFusion
               </h1>
-              <p className="text-lg text-slate-600 font-medium">Next-Generation Medical AI Platform</p>
+              <p className="text-lg text-slate-600 font-medium">Research‑driven Telemedicine & Clinical AI</p>
             </div>
           </div>
 
@@ -54,7 +54,7 @@ export default function RegisterPage() {
               <Lock className="relative w-5 h-5 text-red-600" />
             </div>
             <span className="text-red-700 font-semibold">Access Restricted</span>
-            <span className="text-red-600/70 text-sm">• Platform Not Available For Public Access</span>
+            <span className="text-red-600/70 text-sm">• Research use only • Not available for public access</span>
           </div>
         </div>
 

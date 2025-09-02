@@ -30,7 +30,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary">NeuroFusion</h1>
-                <p className="text-xs text-muted-foreground">Powered by AI • Trusted by Professionals</p>
+                <p className="text-xs text-muted-foreground">Research‑driven telemedicine • Clinical AI</p>
               </div>
             </div>
 
@@ -95,16 +95,16 @@ export default function HomePage() {
             <div className="text-foreground animate-fade-in-right">
               <Badge variant="secondary" className="mb-6 bg-primary/20 text-2xl border-primary/30 animate-bounce">
                 <Brain className="w-4 h-4 mr-2" />
-                AI-Powered Healthcare Platform
+                Research‑driven Telemedicine & Clinical AI
               </Badge>
 
               <h1 className="text-5xl lg:text-6xl font-bold text-balance mb-6 leading-tight animate-slide-up">
-                Connect to an online doctor within <span className="text-primary animate-pulse">60 seconds</span>
+                Connect with a clinician within <span className="text-primary animate-pulse">60 seconds</span>
               </h1>
 
               <p className="text-xl text-muted-foreground text-balance mb-8 max-w animate-slide-up-delay animate-float">
-                Connect to the best doctors providing quality and affordable healthcare services from your desktop or
-                smartphone in less than 60 seconds.
+                A research‑led project uniting secure telemedicine with the world’s first AI system for brain tumor diagnosis,
+                developed with clinicians to support careful, evidence‑based care.
               </p>
 
               {/* Doctor Search Form */}
@@ -160,7 +160,7 @@ export default function HomePage() {
       <section id="solutions" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 animate-fade-in">AI-Powered Healthcare Solutions</h2>
+            <h2 className="text-4xl font-bold mb-4 animate-fade-in">Research‑led Telemedicine and Clinical AI</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto animate-fade-in-delay">
               Experience the future of healthcare with cutting-edge AI technology
             </p>
@@ -169,10 +169,10 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left - Content */}
             <div className="space-y-6 animate-slide-up">
-              <h3 className="text-3xl font-bold">Telemedicine & AI Diagnosis</h3>
+              <h3 className="text-3xl font-bold">Telemedicine and research‑grade AI diagnosis</h3>
               <p className="text-muted-foreground text-lg">
-                Our platform combines advanced telemedicine with AI-powered diagnostic tools to provide 
-                accurate, fast, and reliable healthcare services.
+                We combine privacy‑preserving telemedicine with research‑grade clinical AI — including the world’s first
+                AI system for brain tumor diagnosis — to support clinician‑led decisions.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -186,6 +186,10 @@ export default function HomePage() {
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-primary rounded-full animate-pulse delay-500"></div>
                   <span>Instant medical reports</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-primary rounded-full animate-pulse delay-700"></div>
+                  <span>World’s first AI for brain tumor diagnosis</span>
                 </div>
               </div>
             </div>
@@ -273,12 +277,12 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-primary">NeuroFusion</h3>
-                  <p className="text-xs text-gray-400">Powered by AI • Trusted by Professionals</p>
+                  <p className="text-xs text-gray-400">Research‑driven telemedicine • Clinical AI</p>
                 </div>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed">
-                NeuroFusion's one window digital healthcare platform connects a network of globally recognised and highly
-                qualified online doctors to patients for online chat, audio and video.
+                NeuroFusion is a research initiative advancing telemedicine and clinical AI. Our work includes the world’s first
+                AI system for brain tumor diagnosis, developed in collaboration with clinicians and guided by open science.
               </p>
             </div>
 

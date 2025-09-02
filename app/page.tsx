@@ -23,7 +23,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       {/* Modern Header */}
       <header className="bg-white border-b border-border/50 sticky top-0 z-50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-10 lg:px-18 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-xl">
@@ -31,7 +31,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary">NeuroFusion</h1>
-                <p className="text-xs text-muted-foreground">Research‑driven telemedicine • Clinical AI</p>
+                <p className="text-xs text-muted-foreground">Research‑driven Telemedicine</p>
               </div>
             </div>
 
@@ -67,7 +67,7 @@ export default function HomePage() {
                 Login
               </Link>
               <Link href="/auth/register">
-                <Button className="text-xl bg-primary hover:bg-primary/90 text-white rounded-full px-6 transition-all duration-300 hover:scale-105">
+                <Button className="text-xl bg-primary hover:bg-primary/90 text-white rounded-full px-10 transition-all duration-300 hover:scale-105">
                   Sign Up
                 </Button>
               </Link>
@@ -77,8 +77,8 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section with Split Layout */}
-      <section className="relative min-h-[80vh] flex items-center py-20">
-        <div className="container mx-auto px-4">
+      <section className="relative min-h-[80vh] flex items-center py-10 lg:pt-10">
+        <div className="container mx-auto px-10 lg:px-18">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - GIF */}
             <div className="relative animate-fade-in-left">
@@ -97,16 +97,16 @@ export default function HomePage() {
 
             {/* Right Side - Content */}
             <div className="text-foreground animate-fade-in-right">
-              <Badge variant="secondary" className="mb-6 bg-primary/20 text-2xl border-primary/30 animate-bounce">
+              <Badge variant="secondary" className="mb-6 bg-primary/20 text-xl border-primary/30 animate-bounce">
                 <Brain className="w-4 h-4 mr-2" />
                 Research‑driven Telemedicine & Clinical AI
               </Badge>
 
-              <h1 className="text-5xl lg:text-6xl font-bold text-balance mb-6 leading-tight animate-slide-up">
+              <h1 className="text-4xl lg:text-5xl font-bold text-balance mb-6 leading-tight animate-slide-up">
                 Connect with a clinician within <span className="text-primary animate-pulse">60 seconds</span>
               </h1>
 
-              <p className="text-xl text-muted-foreground text-balance mb-8 max-w animate-slide-up-delay animate-float">
+              <p className="text-lg text-muted-foreground text-balance mb-8 max-w animate-slide-up-delay animate-float">
                 A research‑led project uniting secure telemedicine with the world’s first AI system for brain tumor diagnosis,
                 developed with clinicians to support careful, evidence‑based care.
               </p>
@@ -162,7 +162,7 @@ export default function HomePage() {
 
       {/* AI Healthcare Features Section */}
       <section id="solutions" className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-10 lg:px-18">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 animate-fade-in">Research‑led Telemedicine and Clinical AI</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto animate-fade-in-delay">
@@ -217,7 +217,7 @@ export default function HomePage() {
 
       {/* Patient Experience Section */}
       <section id="about" className="py-20 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-10 lg:px-18">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left - GIF */}
             <div className="relative animate-slide-up">
@@ -261,7 +261,7 @@ export default function HomePage() {
 
       {/* Testimonials Section with Infinite Carousel */}
       <section id="testimonials" className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-10 lg:px-18">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 animate-fade-in">Trusted by Healthcare Professionals</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto animate-fade-in-delay">
@@ -274,8 +274,8 @@ export default function HomePage() {
       </section>
 
       {/* Professional Footer */}
-      <footer id="contact" className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4">
+      <footer id="contact" className="bg-gray-900 text-white py-8">
+        <div className="container mx-auto px-10 lg:px-18">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Company Info */}
             <div>

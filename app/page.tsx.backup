@@ -1,6 +1,5 @@
 "use client"
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -82,14 +81,11 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - GIF */}
             <div className="relative animate-fade-in-left">
-              <div className="relative overflow-hidden rounded-2xl shadow-2xl aspect-[4/3] max-h-[600px]">
-                <Image 
+              <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+                <img 
                   src="/images/1.gif" 
                   alt="Medical consultation" 
-                  fill
-                  className="object-contain" 
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  priority
+                  className="w-full h-auto max-h-[600px] object-contain" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
               </div>
@@ -200,13 +196,11 @@ export default function HomePage() {
 
             {/* Right - GIF */}
             <div className="relative animate-slide-up-delay">
-              <div className="relative overflow-hidden rounded-2xl shadow-2xl aspect-[4/3] max-h-[500px]">
-                <Image 
+              <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+                <img 
                   src="/images/2.gif" 
                   alt="AI Healthcare" 
-                  fill
-                  className="object-contain transform hover:scale-105 transition-transform duration-700" 
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="w-full h-auto max-h-[500px] object-contain transform hover:scale-105 transition-transform duration-700" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none"></div>
               </div>
@@ -221,13 +215,11 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left - GIF */}
             <div className="relative animate-slide-up">
-              <div className="relative overflow-hidden rounded-2xl shadow-2xl aspect-[4/3] max-h-[500px]">
-                <Image 
+              <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+                <img 
                   src="/images/3.gif" 
                   alt="Patient Experience" 
-                  fill
-                  className="object-contain transform hover:scale-105 transition-transform duration-700" 
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="w-full h-auto max-h-[500px] object-contain transform hover:scale-105 transition-transform duration-700" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-accent/20 to-transparent pointer-events-none"></div>
               </div>
@@ -390,7 +382,7 @@ export default function HomePage() {
                     size="sm"
                     className="border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent hover:border-primary/50 transition-all duration-300"
                   >
-                    <Image src="/assets/img/icons/googleplay.png" alt="Google Play" width={20} height={20} className="w-5 h-5 mr-2" />
+                    <img src="/assets/img/icons/googleplay.png" alt="Google Play" className="w-5 h-5 mr-2" />
                     Google Play
                   </Button>
                   <Button
@@ -489,11 +481,9 @@ function InfiniteTestimonialCarousel() {
               <Card className="border-border/50 hover:shadow-lg transition-all duration-300 hover:scale-105 h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex items-center gap-4 mb-4">
-                    <Image
+                    <img
                       src={testimonial.image}
                       alt={testimonial.name}
-                      width={60}
-                      height={60}
                       className="w-15 h-15 rounded-full object-cover border-2 border-primary/20"
                     />
                     <div>

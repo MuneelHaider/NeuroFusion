@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -20,11 +20,22 @@ import {
   Eye,
 } from "lucide-react"
 
+interface UserData {
+  name?: string
+  specialty?: string
+  role?: string
+  licenseNumber?: string
+  email?: string
+}
+
 export function AIDiagnosisService() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<UserData | null>(null)
+  const imageUploadRef = useRef<HTMLInputElement>(null)
+  const dicomUploadRef = useRef<HTMLInputElement>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisComplete, setAnalysisComplete] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [results, setResults] = useState<typeof mockResults | null>(null)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [patientInfo, setPatientInfo] = useState({
     fullName: "",
@@ -65,33 +76,42 @@ export function AIDiagnosisService() {
     setPatientInfo(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleAnalysis = () => {
+  const handleAnalysis = async () => {
     if (uploadedFiles.length === 0) {
       alert("Please upload medical images first")
       return
     }
-    
+    const niiFile = uploadedFiles.find(f => f.name.toLowerCase().endsWith('.nii') || f.name.toLowerCase().endsWith('.nii.gz'))
+    if (!niiFile) {
+      alert('Please upload a .nii or .nii.gz file for AI analysis')
+      return
+    }
+
     setIsAnalyzing(true)
-    setProgress(0)
-    
-    // Simulate 20 second analysis with progress updates
-    const totalSteps = 20
-    const stepDuration = 1000 // 1 second per step
-    
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        const newProgress = prev + (100 / totalSteps)
-        if (newProgress >= 100) {
-          clearInterval(interval)
-          setTimeout(() => {
-            setIsAnalyzing(false)
-            setAnalysisComplete(true)
-          }, 500)
-          return 100
-        }
-        return newProgress
-      })
-    }, stepDuration)
+    setProgress(10)
+    setResults(null)
+
+    try {
+      const form = new FormData()
+      form.append('file', niiFile)
+
+      const resp = await fetch('/api/inference', { method: 'POST', body: form })
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}))
+        throw new Error(err.error || 'Inference request failed')
+      }
+      const data = await resp.json()
+      const r = data.result as typeof mockResults
+      setResults(r)
+      setProgress(100)
+      setIsAnalyzing(false)
+      setAnalysisComplete(true)
+    } catch (e: any) {
+      console.error('Inference failed:', e)
+      alert(`AI inference failed: ${e?.message || e}`)
+      setIsAnalyzing(false)
+      setProgress(0)
+    }
   }
 
   const mockResults = {
@@ -117,36 +137,38 @@ export function AIDiagnosisService() {
 
   const generateReport = () => {
     // Create a comprehensive report with patient info and diagnosis results
-          console.log("Current user data:", user)
-      console.log("User name:", user?.name)
-      console.log("User specialty:", user?.specialty)
-      console.log("User role:", user?.role)
-      console.log("User licenseNumber:", user?.licenseNumber)
-      
+    console.log("Current user data:", user)
+    console.log("User name:", user?.name)
+    console.log("User specialty:", user?.specialty)
+    console.log("User role:", user?.role)
+    console.log("User licenseNumber:", user?.licenseNumber)
+    
       const reportData = {
         patientInfo,
-        diagnosisResults: mockResults,
-        reportDate: new Date().toLocaleDateString(),
-        reportTime: new Date().toLocaleTimeString(),
-        doctorName: `Dr. ${user?.name}` || "Dr. [Doctor Name]",
-        doctorCredentials: user?.specialty || "MBBS, M.MED (RADIOLOGY)",
-        doctorTitle: "Consultant Radiologist",
-        doctorId: user?.licenseNumber || "MMC Registration: [To be filled]",
-        companyName: "NeuroFusion",
-        companyType: "Telemedicine Company",
-        location: "Islamabad, Pakistan",
-        reportNumber: `NF-${Date.now().toString().slice(-6)}`,
-        mrn: patientInfo.fullName ? patientInfo.fullName.replace(/\s+/g, '').toUpperCase() + Date.now().toString().slice(-4) : `MRN${Date.now().toString().slice(-6)}`
-      }
-      
-      console.log("Generated report data:", reportData)
+        diagnosisResults: results || mockResults,
+      reportDate: new Date().toLocaleDateString(),
+      reportTime: new Date().toLocaleTimeString(),
+      doctorName: `Dr. ${user?.name}` || "Dr. [Doctor Name]",
+      doctorCredentials: user?.specialty || "MBBS, M.MED (RADIOLOGY)",
+      doctorTitle: "Consultant Radiologist",
+      doctorId: user?.licenseNumber || "MMC Registration: [To be filled]",
+      companyName: "NeuroFusion",
+      companyType: "Telemedicine Company",
+      location: "Islamabad, Pakistan",
+      reportNumber: `NF-${Date.now().toString().slice(-6)}`,
+      mrn: patientInfo.fullName ? patientInfo.fullName.replace(/\s+/g, '').toUpperCase() + Date.now().toString().slice(-4) : `MRN${Date.now().toString().slice(-6)}`
+    }
+    
+    console.log("Generated report data:", reportData)
     
     // Open report in new tab with built-in PDF viewer
     const reportWindow = window.open('', '_blank')
-    if (reportWindow) {
-      reportWindow.document.write(generateProfessionalReportHTML(reportData))
-      reportWindow.document.close()
+    if (!reportWindow) {
+      alert('Please allow popups to view the report. Check your browser settings.')
+      return
     }
+    reportWindow.document.write(generateProfessionalReportHTML(reportData))
+    reportWindow.document.close()
   }
 
   const generateProfessionalReportHTML = (data: any) => {
@@ -600,8 +622,6 @@ export function AIDiagnosisService() {
 
           <div class="action-buttons">
             <button class="btn btn-primary" onclick="window.print()">Print Report</button>
-            <button class="btn" onclick="downloadAsPDF()">Download PDF</button>
-            <button class="btn" onclick="downloadAsWord()">Download Word</button>
           </div>
 
           <div class="footer">
@@ -609,78 +629,6 @@ export function AIDiagnosisService() {
             <p>© ${new Date().getFullYear()} NeuroFusion Telemedicine Company, Islamabad, Pakistan. All rights reserved.</p>
           </div>
         </div>
-
-        <script>
-          async function downloadAsPDF() {
-            try {
-              // Create a new window for PDF generation
-              const pdfWindow = window.open('', '_blank')
-              if (!pdfWindow) {
-                alert('Please allow popups to download PDF')
-                return
-              }
-              
-              // Copy the report content to the new window
-              pdfWindow.document.write(\`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                  <title>NeuroFusion AI Brain Tumor Diagnosis Report - PDF</title>
-                  <style>
-                    @media print {
-                      body { margin: 0; }
-                      .report-container { padding: 20px; }
-                    }
-                    \${document.querySelector('style').innerHTML}
-                  </style>
-                </head>
-                <body>
-                  \${document.querySelector('.report-container').outerHTML}
-                </body>
-                </html>
-              \`)
-              
-              pdfWindow.document.close()
-              
-              // Wait for content to load then print
-              setTimeout(() => {
-                pdfWindow.print()
-                // Close the window after printing
-                setTimeout(() => pdfWindow.close(), 1000)
-              }, 500)
-              
-            } catch (error) {
-              console.error('PDF generation failed:', error)
-              alert('PDF generation failed. Please try printing instead.')
-            }
-          }
-          
-          async function downloadAsWord() {
-            try {
-              // Create a simple Word document structure
-              const content = document.querySelector('.report-container').innerText
-              
-              // Create a blob with the content
-              const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
-              const url = window.URL.createObjectURL(blob)
-              
-              // Create download link
-              const link = document.createElement('a')
-              link.href = url
-              link.download = 'NeuroFusion-ai-diagnosis-report-${data.reportNumber}.docx'
-              document.body.appendChild(link)
-              link.click()
-              document.body.removeChild(link)
-              
-              // Cleanup
-              window.URL.revokeObjectURL(url)
-              
-            } catch (error) {
-              console.error('Word generation failed:', error)
-              alert('Word generation failed. Please try printing instead.')
-            }
-          }
-        </script>
       </body>
       </html>
     `
@@ -866,33 +814,41 @@ export function AIDiagnosisService() {
                     Upload MRI, CT scans, or DICOM files for AI-powered brain tumor analysis
                   </p>
                   <div className="flex gap-2 justify-center">
-                    <Button variant="outline" className="flex items-center gap-2">
+                    <input
+                      ref={imageUploadRef}
+                      type="file"
+                      multiple
+                      accept="image/*,.dcm,.nii,.nii.gz"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                      onClick={() => imageUploadRef.current?.click()}
+                      type="button"
+                    >
                       <FileImage className="w-4 h-4" />
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*,.dcm"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <label htmlFor="image-upload" className="cursor-pointer">
-                        Image Files
-                      </label>
+                      Image Files
                     </Button>
-                    <Button variant="outline" className="flex items-center gap-2">
+                    <input
+                      ref={dicomUploadRef}
+                      type="file"
+                      multiple
+                      accept=".dcm,.zip,.nii,.nii.gz"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="dicom-upload"
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                      onClick={() => dicomUploadRef.current?.click()}
+                      type="button"
+                    >
                       <FileArchive className="w-4 h-4" />
-                      <input
-                        type="file"
-                        multiple
-                        accept=".dcm,.zip"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        id="dicom-upload"
-                      />
-                      <label htmlFor="dicom-upload" className="cursor-pointer">
-                        DICOM Files
-                      </label>
+                      DICOM Files
                     </Button>
                   </div>
                 </div>
@@ -926,11 +882,11 @@ export function AIDiagnosisService() {
                 {!isAnalyzing && !analysisComplete && uploadedFiles.length > 0 && (
                   <Button 
                     onClick={handleAnalysis}
-                    className="w-full p-10 text-3xl"
+                    className="w-full"
                     size="lg"
                     disabled={uploadedFiles.length === 0}
                   >
-                    <Brain className="w-4 h-4 mr-2" />
+                    <Brain className="w-5 h-5 mr-2" />
                     Run AI Brain Tumor Diagnosis
                   </Button>
                 )}
@@ -974,29 +930,29 @@ export function AIDiagnosisService() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                       <h4 className="font-semibold text-red-800 mb-1">Primary Diagnosis</h4>
-                      <p className="text-red-700 text-sm">{mockResults.diagnosis}</p>
+                      <p className="text-red-700 text-sm">{(results || mockResults).diagnosis}</p>
                     </div>
                     <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
                       <h4 className="font-semibold text-orange-800 mb-1">Detection Confidence</h4>
-                      <p className="text-orange-700 text-sm">{mockResults.confidence}%</p>
+                      <p className="text-orange-700 text-sm">{(results || mockResults).confidence}%</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <h4 className="font-semibold text-blue-800 mb-1">Tumor Location</h4>
-                      <p className="text-blue-700 text-sm">{mockResults.tumorLocation}</p>
+                      <p className="text-blue-700 text-sm">{(results || mockResults).tumorLocation}</p>
                     </div>
                     <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
                       <h4 className="font-semibold text-purple-800 mb-1">Tumor Size</h4>
-                      <p className="text-purple-700 text-sm">{mockResults.tumorSize}</p>
+                      <p className="text-purple-700 text-sm">{(results || mockResults).tumorSize}</p>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <h4 className="font-semibold">Key Recommendations</h4>
                     <ul className="space-y-2">
-                      {mockResults.recommendations.slice(0, 3).map((rec, index) => (
+                      {(results || mockResults).recommendations.slice(0, 3).map((rec, index) => (
                         <li key={index} className="flex items-start gap-2">
                           <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                           <span className="text-sm">{rec}</span>
@@ -1008,21 +964,17 @@ export function AIDiagnosisService() {
                   <div className="flex gap-2">
                     <Button variant="outline" className="flex-1" onClick={generateReport}>
                       <Eye className="w-4 h-4 mr-2" />
-                      View Report
+                      View Full Report
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => {
+                    <Button variant="default" className="flex-1" onClick={() => {
                       generateReport()
-                      // PDF download will be handled in the new tab
+                      // User can print from the opened report window
+                      setTimeout(() => {
+                        alert('Click the "Print Report" button in the opened window to print or save as PDF')
+                      }, 500)
                     }}>
                       <Download className="w-4 h-4 mr-2" />
-                      Download PDF
-                    </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => {
-                      generateReport()
-                      // Word download will be handled in the new tab
-                    }}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      Download Word
+                      Print / Save as PDF
                     </Button>
                   </div>
                 </CardContent>
